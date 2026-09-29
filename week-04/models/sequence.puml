@@ -1,0 +1,32 @@
+@startuml
+actor Student
+participant BookingService
+participant BookingRepository
+Student -> BookingService: requestBooking(roomId, startTime, endTime)
+BookingService -> BookingService: validateTimeRange(startTime, endTime) (R1)
+alt invalid time range
+  BookingService --> Student: reject booking (R1)
+else valid time range
+  BookingService -> BookingRepository: isRoomBlocked(roomId) (R3)
+  BookingRepository --> BookingService: blocked status
+  alt room blocked
+    BookingService --> Student: reject booking (R3)
+  else room unblocked
+    BookingService -> BookingRepository: hasOverlappingActiveBooking(roomId, startTime, endTime) (R2)
+    BookingRepository --> BookingService: overlap result
+    alt overlap exists
+      BookingService --> Student: reject booking (R2)
+    else room available
+      BookingService -> BookingRepository: saveBooking(roomId, startTime, endTime)
+      BookingRepository --> BookingService: booking created
+      BookingService --> Student: send successful booking confirmation (R4)
+    end
+  end
+end
+note over BookingService
+  R1 checks a future start and a positive duration of at most two hours.
+  R2 treats bookings as half-open intervals; touching endpoints do not overlap.
+  Blocking a room prevents new bookings and does not cancel existing bookings.
+  BookingService validates and coordinates; BookingRepository checks and stores bookings.
+end note
+@enduml

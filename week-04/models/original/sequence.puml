@@ -1,0 +1,19 @@
+@startuml
+actor Student
+participant BookingService
+participant BookingRepository
+Student -> BookingService: createBooking(roomId, start, end)
+BookingService -> BookingRepository: saveBooking(roomId, start, end)
+BookingRepository --> BookingService: booking saved
+BookingService -> BookingRepository: checkAvailability(roomId, start, end)
+BookingRepository --> BookingService: available or blocked
+alt created
+  BookingService --> Student: send confirmation
+else unavailable
+  BookingService --> Student: reject booking
+end
+note over BookingService
+  Assumption: availability is checked after the reservation is saved.
+  BookingService coordinates the request; BookingRepository stores bookings.
+end note
+@enduml

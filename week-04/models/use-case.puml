@@ -1,0 +1,22 @@
+@startuml
+left to right direction
+actor Student
+actor Administrator
+rectangle "Smart Campus study room booking system" {
+  usecase "View availability" as ViewAvailability
+  usecase "Book room" as BookRoom
+  usecase "Cancel booking" as CancelBooking
+  usecase "Block / unblock room" as BlockRoom
+  usecase "Review usage" as ReviewUsage
+  usecase "Send confirmation" as SendConfirmation
+}
+Student -- ViewAvailability
+Student -- BookRoom
+Student -- CancelBooking
+Administrator -- BlockRoom
+Administrator -- ReviewUsage
+' why: R4 and US-06 make confirmation a conditional outcome only after a booking succeeds.
+SendConfirmation ..> BookRoom : <<extend>> [booking succeeds]
+' why: US-06 also requires confirmation only after a cancellation succeeds.
+SendConfirmation ..> CancelBooking : <<extend>> [cancellation succeeds]
+@enduml
