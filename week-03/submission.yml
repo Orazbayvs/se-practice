@@ -1,0 +1,40 @@
+# week-03/submission.yml — declaration draft; student-specific facts remain to be completed.
+schema: 1
+week: "03"
+
+student:
+  name: Koibagar Orazbay
+  student_id: 24B032151
+  github: Orazbayvs
+
+assistant:
+  tool: GitHub Copilot
+  model: GPT-6 Luna
+
+counts:
+  user_stories: 6
+  acceptance_criteria_sets: 3
+
+checker:
+  pass: 23
+  fail: 0
+  error: 0
+  commit: 2e8c770
+
+assumptions:
+  overlap_touching_bookings: allowed
+  exactly_two_hours: allowed
+
+traceability:
+  use_cases_not_covered: []
+  stories_not_traced: []
+
+review_findings:
+  - "US-05 and US-06 split the single UC-04 block/unblock function into two stories; I combined them as US-04."
+  - "US-08 added a separate room-status viewing goal that duplicates availability and block/unblock; I did not retain it as a separate story."
+  - "The supplied acceptance answer restarted AC numbering in each story section; I renumbered the final criteria globally from AC-01 to AC-11."
+  - "UC-02 and UC-03 included UC-06 unconditionally, which could send confirmation for unsuccessful actions; I removed both include links."
+
+honesty:
+  can_explain_everything_submitted: yes
+  ai_usage_disclosed: yes
