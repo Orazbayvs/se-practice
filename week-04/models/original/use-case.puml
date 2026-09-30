@@ -1,24 +1,28 @@
 @startuml
 left to right direction
+
 actor Student
 actor Administrator
-rectangle "Smart Campus study room booking" {
-  usecase "View availability" as ViewAvailability
-  usecase "Book room" as BookRoom
-  usecase "Cancel booking" as CancelBooking
-  usecase "Block / unblock room" as BlockRoom
-  usecase "Review usage" as ReviewUsage
-  usecase "Send confirmation" as SendConfirmation
-}
-Student -- ViewAvailability
-Student -- BookRoom
-Student -- CancelBooking
-Student -- ReviewUsage
-Administrator -- BlockRoom
-Administrator -- ReviewUsage
-Administrator -- SendConfirmation
-BookRoom ..> SendConfirmation : <<include>>
-CancelBooking ..> SendConfirmation : <<include>>
 
-' Assumptions: confirmation is an included step of booking and cancellation; both actors may review usage.
+rectangle "Smart Campus Study Room Booking System" {
+
+    usecase "View availability" as UC01
+    usecase "Book room" as UC02
+    usecase "Cancel booking" as UC03
+    usecase "Block or unblock room" as UC04
+    usecase "Review usage" as UC05
+    usecase "Send confirmation" as UC06
+}
+
+Student --> UC01
+Student --> UC02
+Student --> UC03
+Student --> UC06
+
+Administrator --> UC04
+Administrator --> UC05
+
 @enduml
+
+
+

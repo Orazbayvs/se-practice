@@ -8,15 +8,15 @@ rectangle "Smart Campus study room booking system" {
   usecase "Cancel booking" as CancelBooking
   usecase "Block / unblock room" as BlockRoom
   usecase "Review usage" as ReviewUsage
-  usecase "Send confirmation" as SendConfirmation
+  usecase "Receive confirmation" as ReceiveConfirmation
 }
 Student -- ViewAvailability
 Student -- BookRoom
 Student -- CancelBooking
 Administrator -- BlockRoom
 Administrator -- ReviewUsage
-' why: R4 and US-06 make confirmation a conditional outcome only after a booking succeeds.
-SendConfirmation ..> BookRoom : <<extend>> [booking succeeds]
-' why: US-06 also requires confirmation only after a cancellation succeeds.
-SendConfirmation ..> CancelBooking : <<extend>> [cancellation succeeds]
+' why: R4, US-06, and the scenario make successful-booking confirmation conditional on success.
+ReceiveConfirmation ..> BookRoom : <<extend>> [booking succeeds]
+' why: US-06 and the scenario require confirmation after a successful cancellation.
+ReceiveConfirmation ..> CancelBooking : <<extend>> [cancellation succeeds]
 @enduml

@@ -1,6 +1,6 @@
 # Week 04 — Lab report: Modeling the System with UML
 
-> Working draft prepared with GitHub Copilot in the current session. Verify every judgment, and replace the preliminary critique with the output from the required new chat before submitting.
+> Working draft prepared with GitHub Copilot. Review the judgments and complete the separate-chat critique before submission.
 
 ---
 
@@ -22,7 +22,7 @@ The six approved stories were copied, with their original IDs and wording, from 
 
 ## 2. Prompts as sent
 
-The prompt text below is copied unchanged from the Week 04 README. The model drafts were prepared in this Copilot session; they were not obtained by opening a separate chat and sending these prompts as messages. The files in `models/original/` are the draft originals for this work, but they do not substitute for evidence from the required one-chat workflow if the instructor expects that literal process.
+The three task prompts below are copied unchanged from the Week 04 README. The student reports sending them to the AI and copying the resulting PlantUML into `models/original/`. The earlier working drafts were removed from those files; each currently contains one response. Keep those files unchanged from this point. Confirm before submission that the captured blocks are the complete first replies and that Tasks 1–3 were sent in the required same chat.
 
 ### 2.1 Task 1 — use-case prompt
 
@@ -58,14 +58,14 @@ Compare my diagrams with the requirements. Identify missing rules, inconsistent 
 
 ## 3. Task 1 — use-case review
 
-**Assumptions the AI listed:** It assumed both actors can review usage, that an administrator sends confirmation, and that booking/cancellation always include confirmation. These assumptions are not supported by the scenario; confirmation is system behavior after success.
+**Assumptions the AI listed:** None. The response omitted the requested assumptions. The revised class and sequence diagrams declare the two scenario decisions: touching bookings are allowed, and blocking a room does not cancel existing bookings.
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | Student → Review usage | The scenario assigns usage review to the Administrator, not the Student. | US-05 | Removed the Student association. |
-| 2 | Administrator → Send confirmation | A person does not directly initiate this system action; it follows a successful student request. | R4, US-06 | Removed the Administrator association; modeled confirmation as a conditional extension. |
-| 3 | Book room / Cancel booking include Send confirmation | An unconditional include wrongly suggests a confirmation is sent even when the request fails. | R4, US-06 | Replaced includes with success-guarded extensions. |
-| 4 | Send confirmation | This is the sixth required scenario function and must remain represented, despite not being a direct actor goal. | US-06 | Retained it as a conditional use case extended only on success. |
+| 1 | Student → Send confirmation | The diagram makes confirmation a direct student goal, although US-06 describes receiving it as the outcome of a successful request. | R4, US-06 | Removed the actor association and renamed the use case `Receive confirmation`. |
+| 2 | Book room / Cancel booking → confirmation | The response shows no condition or relationship explaining when confirmation occurs. R4 only states the booking rule; cancellation confirmation comes from US-06 and the scenario. | R4, US-06, Scenario | Added success-guarded extend relationships; the booking reason cites R4/US-06 and the cancellation reason cites US-06/Scenario. |
+| 3 | Assumptions | The prompt asked for assumptions, but none were listed. | R2, R3 | Declared the touching-bookings and blocked-room assumptions in the revised behavior diagram. |
+| 4 | Six scenario use cases | All six required functions are present and actor responsibilities for the five directly initiated goals match the stories. | US-01–US-06 | Kept the six use cases; confirmation remains unassociated with actors. |
 
 ---
 
@@ -92,9 +92,11 @@ Compare my diagrams with the requirements. Identify missing rules, inconsistent 
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | `Room *-- Booking` | Composition says a booking is a lifetime-dependent part of a room. The scenario does not establish that ownership; a booking is a separate reservation associated with one room. | US-02, US-03 | Replaced composition with a plain association. |
-| 2 | Room–Booking multiplicity `1..*` at Booking | It requires every room to have an existing booking, which is false for a free room. | US-01, US-02 | Changed the Booking end to `0..*`. |
-| 3 | Booking operations `confirm()` | The domain class should represent reservation state; confirmation is a system outcome, not a booking lifecycle operation specified by the domain stories. | R4, US-06 | Removed the operation; kept status and confirmation in the use-case/sequence views. |
+| 1 | `Student.name`, `Room.name`, and `receiveConfirmation()` | The response adds member details not needed to express R1–R3; confirmation is a system outcome, not a Student domain operation required by the stories. | R1–R3, R4, US-06 | Removed those unsupported members; kept `Room.block/unblock` and `Booking.cancel/overlaps` because US-03, US-04, and R2 justify them. |
+| 2 | `Booking` has no `status` | Cancellation and the R2 phrase “active bookings” need a way to distinguish active from cancelled bookings. | R2, US-03 | Added `status: BookingStatus` with `ACTIVE` and `CANCELLED`. |
+| 3 | No explicit R2 constraint note | An `overlaps()` operation alone does not state the required invariant on the class diagram. | R2 | Added a note to `Booking` stating active bookings for one room do not overlap; the behavior note labels the touching-bookings decision as assumption A1. |
+| 4 | R1 note omits the positive lower bound | “Up to two hours” alone does not make the required duration greater than zero explicit. | R1 | Made the revised `Booking` note state duration is greater than zero and at most two hours. |
+| 5 | No explicit R3 constraint note on `Room` | The `blocked` attribute is present, but the class view did not state its booking consequence. | R3, US-04 | Added a `Room` note: a blocked room cannot be booked. |
 
 ---
 
@@ -106,23 +108,27 @@ Compare my diagrams with the requirements. Identify missing rules, inconsistent 
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | Save before validation in the original sequence | Invalid or conflicting requests could be persisted before the rules are checked. | R1–R3 | Moved all checks before `saveBooking`; only the no-overlap branch saves. |
-| 2 | Availability check after save | The original could create a booking before discovering that the room is blocked or unavailable. | R2, R3 | Check blocked status and overlapping active bookings before saving. |
-| 3 | One vague `unavailable` alternative | It did not make the distinct rule failures or the no-save behavior explicit. | R1–R3 | Added guarded rejection alternatives for invalid time, blocked room, and overlap; each exits before save. |
-| 4 | Confirmation | The original success path did not establish that confirmation followed all successful checks and persistence. | R4 | Send confirmation only after the repository returns a created booking. |
+| 1 | `checkRoomAvailability` | One opaque call does not show the separate blocked-room and overlap checks required by R3 and R2. | R2, R3 | Replaced it with explicit `isRoomBlocked` and `hasOverlappingActiveBooking` calls, both before saving. |
+| 2 | Generic `Room unavailable` alternative | It does not tell the student whether the room is blocked or the requested time overlaps another booking. | R2, R3 | Added separately guarded rejection branches for blocked room and overlapping booking. |
+| 3 | No visible failed-time branch | The R1 validation is named, but the response does not show rejection when the time range is invalid. | R1 | Added an `alt` branch for invalid time range before any repository call or save. |
+| 4 | Confirmation and assumptions | The response does not visibly tag confirmation with R4 or identify the interval/blocking decisions as assumptions. | R4, R2, R3 | Send a confirmation after persistence; label A1 and A2 explicitly in the note and declare them in §4.3. |
 
 ---
 
 ## 6. AI critique
 
-> Preliminary review written by Copilot in this session, not the required critique from a separate new chat. Replace or verify these rows against the actual new-chat response before submission.
+The critique was run in a separate Copilot chat using the approved stories and revised diagrams. I checked its claims against the actual files and the Week 04 instructions; several suggestions were accepted, while assumptions explicitly required by the lab were retained.
 
-| # | Issue the AI raised | Element it cited | Verdict | Why |
+| # | Issue the AI raised | Element | Verdict | Why / action |
 | --- | --- | --- | --- | --- |
-| 1 | The use-case diagram omits an actor association for Send confirmation. | Send confirmation | reject | R4 and US-06 describe confirmation as an outcome after success, not a goal a person directly triggers; the diagram intentionally has no actor link. |
-| 2 | `BookingStatus` is not explicitly required by a story. | BookingStatus | accept | The sequence and R2 need a distinction between active and cancelled bookings to define which reservations participate in overlap checks. It is a minimal domain state, not a new feature. |
-| 3 | The sequence could show duration validation more visibly. | `validateTimeRange` | accept | The call names the check and the note gives the future-start and maximum-duration details. To make the bound directly visible, the message/note could be made more explicit if a reviewer finds the present wording insufficient. |
-| 4 | The class diagram does not model Administrator as a class. | Administrator | reject | An actor is not necessarily a domain class. The required minimum domain classes are Student, Room, and Booking; administrator actions belong to the use-case view and are covered by US-04/US-05. |
+| 1 | The use-case name should describe the student receiving, not the system sending, a confirmation. | `Send confirmation` | accept | US-06 says the student receives confirmation. Renamed it `Receive confirmation` and retained no actor association. |
+| 2 | The cancellation-confirmation relationship should cite US-06 and the scenario, not R4 alone. | Cancellation extension | accept | R4 covers successful booking; US-06 and the scenario also require confirmation after successful cancellation. Updated the direct-above `why:` comment. |
+| 3 | State R3’s effect on the class diagram near the blocked-room attribute. | `Room.blocked` | accept | Added a `Room` note that a blocked room cannot be booked, directly reflecting R3. |
+| 4 | `BookingStatus` is a reasonable inference, not an explicitly named requirement element. | `BookingStatus` | accept | Kept it as a minimal design choice derived from US-03 cancellation and R2’s “active bookings”; do not describe the enum itself as explicitly prescribed. |
+| 5 | Remove the half-open interval and existing-bookings-after-block decisions as unsupported assumptions. | A1, A2 | reject | README §3 explicitly says both questions are undecided and must be declared as assumptions when a diagram depends on them. Kept both in §4.3 and labeled them A1/A2 in the sequence note. |
+| 6 | Consider removing `BookingService` and `BookingRepository` as implementation-level elements. | Sequence lifelines | reject | The required sequence prompt explicitly requires both lifelines; §5 explains them as design components, and they are not added to the domain class diagram. |
+| 7 | Remove `Room.isAvailable()` as an unjustified operation. | `Room.isAvailable()` | reject / not applicable | That operation is not in the submitted class diagram. The retained `block()`, `unblock()`, `cancel()`, and `overlaps()` operations are supported by US-04, US-03, and R2. |
+| 8 | `DateTime` is a modeling choice rather than a specified datatype. | `startTime`, `endTime` | accept | Kept the attributes needed by R1/R2; treat `DateTime` as a reasonable representation choice, not a mandated type. |
 
 ---
 
@@ -133,13 +139,13 @@ Compare my diagrams with the requirements. Identify missing rules, inconsistent 
 | R1 | Book room | `Booking.startTime`, `Booking.endTime`; Booking note | `validateTimeRange` checks a future start and a positive duration of at most two hours; invalid-time alternative rejects. |
 | R2 | Book room | `Booking.status`, `Booking.startTime`, `Booking.endTime`; non-overlap note | `hasOverlappingActiveBooking`; overlap alternative rejects before save. |
 | R3 | Book room | `Room.blocked` | `isRoomBlocked`; blocked-room alternative rejects before save. |
-| R4 | Send confirmation | `Booking` is created with reservation state | Success branch sends confirmation only after save returns created. |
+| R4 | Receive confirmation | `Booking` is created with reservation state | Success branch returns confirmation only after save returns created. |
 | US-01 | View availability | `Room.blocked`, `Booking` interval/status | Not part of the selected Book room sequence; availability is a separate use case. |
 | US-02 | Book room | `Student`, `Room`, `Booking` | Student requests booking; validations precede save. |
 | US-03 | Cancel booking | `Student`, `Booking`, `Booking.status` | Not part of the selected Book room sequence; cancellation is outside this behavior diagram. |
 | US-04 | Block / unblock room | `Room.blocked` | The sequence reads blocked status for the booking decision; administrator changes are outside this behavior diagram. |
 | US-05 | Review usage | `Room`, `Booking` | Not part of the selected Book room sequence; review is outside this behavior diagram. |
-| US-06 | Send confirmation | `Booking` success state | Success branch sends the booking confirmation after persistence. |
+| US-06 | Receive confirmation | `Booking` success state | Success branch returns the booking confirmation after persistence; cancellation confirmation is represented in the use-case view but is outside the selected behavior. |
 
 ---
 
@@ -147,15 +153,14 @@ Compare my diagrams with the requirements. Identify missing rules, inconsistent 
 
 | # | Diagram | Before (AI's original) | After (your revision) | Reason |
 | --- | --- | --- | --- | --- |
-| 1 | use case | Student linked to Review usage; Administrator linked to Send confirmation; unconditional includes | Correct actor responsibilities; success-guarded extensions for confirmation; six supplied goals retained | US-05 assigns review to Administrator; R4/US-06 make confirmation conditional. |
-| 2 | class | Room composed of Booking with multiplicity `1..*`; Booking had `confirm()` | Plain Room–Booking association with `1` / `0..*`; removed unsupported `confirm()` | A booking is not a lifecycle-dependent part of a room; free rooms can have no bookings; confirmation is a system outcome. |
-| 3 | sequence | Saved before validation and checked availability after save | R1, R3, and R2 checks precede persistence; each failure rejects without saving | Rules must be validated before creating a booking; R4 confirmation follows successful save. |
+| 1 | use case | Student directly linked to Send confirmation; missing condition; cancellation rationale attributed to R4 | Removed direct actor link, renamed the goal to Receive confirmation, and documented distinct booking/cancellation rationale | US-06 describes receipt; R4 applies to booking, while US-06 and the scenario cover cancellation. |
+| 2 | class | Extra member details; no `Booking.status`; no R2/R3 notes; R1 bound omitted duration > 0 | Added `BookingStatus`, full R1 bound, and R2/R3 notes; kept plain `1` / `0..*` associations | R1–R3, US-03 and US-04 support the state and constraints. |
+| 3 | sequence | One generic availability check and generic unavailable branch; assumptions were not distinguished from rules | Added separate R3 and R2 checks plus an R1 failure branch; labeled A1/A2; confirmation follows persistence | Every rule is visible, failures stop before persistence, and the two undecided choices are explicitly assumptions. |
 
 ---
 
 ## 9. Checker output
-
-Checker has not yet been run. Paste the complete output of `python tests/check_models.py` here after the final worksheet and images are in place, then list and explain every FAIL being kept. Do not submit this placeholder.
+Latest run: `python tests/check_models.py`.
 
 ```text
 Week 04 structural check - shape only, never quality
@@ -191,7 +196,7 @@ LR2  PASS  5 prompts pasted in §2
 LR3  PASS  4 use-case findings in §3
 LR4  PASS  §4 relationships read both ways, 2 assumption(s) declared
 LR5  PASS  4 behaviour-diagram findings in §5
-LR6  PASS  4 critique issues with a verdict
+LR6  PASS  8 critique issues with a verdict
 LR7  PASS  3 change-log rows covering all three diagrams
 CS1  PASS  6 approved stories
 CS2  PASS  §7 traces R1-R4 into the diagrams

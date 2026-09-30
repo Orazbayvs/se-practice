@@ -1,27 +1,36 @@
 @startuml
+hide circle
+skinparam classAttributeIconSize 0
+
 class Student {
-  studentId: String
-  +bookRoom()
-  +cancelBooking()
+    - studentId: String
+    - name: String
+    + viewAvailability()
+    + bookRoom()
+    + cancelBooking()
+    + receiveConfirmation()
 }
+
 class Room {
-  roomId: String
-  isBlocked: Boolean
-  +block()
-  +unblock()
+    - roomId: String
+    - name: String
+    - blocked: Boolean
+    + checkAvailability()
+    + block()
+    + unblock()
 }
+
 class Booking {
-  startTime: DateTime
-  endTime: DateTime
-  status: String
-  +confirm()
+    - bookingId: String
+    - startTime: DateTime
+    - endTime: DateTime
+    + create()
+    + cancel()
+    + validateTime()
+    + overlaps(other: Booking): Boolean
 }
+
 Student "1" -- "0..*" Booking : makes
-Room "1" *-- "1..*" Booking : contains
-note right of Booking
-  A booking must start in the future and may last up to two hours.
-end note
-' Student-Booking: one student may have many bookings; each booking has one student.
-' Room-Booking: a room contains one or more bookings; each booking has one room.
-' Assumption: a Booking is a part of its Room and cannot exist independently.
+Room "1" -- "0..*" Booking : has
+
 @enduml
