@@ -1,0 +1,33 @@
+@startuml
+class Student {
+  studentId: String
+}
+class Room {
+  roomId: String
+  blocked: Boolean
+  +block()
+  +unblock()
+}
+class Booking {
+  bookingId: String
+  startTime: DateTime
+  endTime: DateTime
+  status: BookingStatus
+  +cancel()
+  +overlaps(other: Booking): Boolean
+}
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}
+Student "1" -- "0..*" Booking : makes
+Room "1" -- "0..*" Booking : is reserved by
+note right of Room
+  R3: A blocked room cannot be booked.
+end note
+note right of Booking
+  R1: startTime is in the future; endTime is after startTime;
+  duration is greater than zero and at most two hours.
+  R2: active bookings for the same room do not overlap.
+end note
+@enduml

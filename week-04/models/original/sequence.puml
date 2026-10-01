@@ -1,0 +1,32 @@
+@startuml
+title Book Room — Sequence Diagram
+
+actor Student
+participant "BookingService" as Service
+participant "BookingRepository" as Repository
+
+Student -> Service : bookRoom(roomId, startTime, endTime)
+activate Service
+
+Service -> Service : Validate R1\nFuture start; 0 < duration <= 2 hours
+Service -> Repository : checkRoomAvailability(roomId, startTime, endTime)
+activate Repository
+
+Repository --> Service : availability result
+deactivate Repository
+
+alt Room available
+    Service -> Repository : saveBooking(student, roomId, startTime, endTime)
+    activate Repository
+
+    Repository --> Service : booking created
+    deactivate Repository
+
+    Service --> Student : confirmation(booking)
+else Room unavailable
+    Service --> Student : booking rejected\n(room unavailable)
+end
+
+deactivate Service
+
+@enduml

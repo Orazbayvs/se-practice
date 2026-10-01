@@ -1,0 +1,35 @@
+@startuml
+title Book room — sequence diagram
+
+actor Student
+participant "BookingService" as BookingService
+participant "BookingRepository" as BookingRepository
+
+Student -> BookingService: requestBooking(roomId, startTime, endTime)
+BookingService -> BookingService: validateTimeRange(startTime, endTime) (R1)
+alt invalid time range
+  BookingService --> Student: rejectBooking("invalid time range")
+else valid time range
+  BookingService -> BookingRepository: isRoomBlocked(roomId) (R3)
+  BookingRepository --> BookingService: blocked status
+  alt room blocked
+    BookingService --> Student: rejectBooking("room blocked")
+  else room unblocked
+    BookingService -> BookingRepository: hasOverlappingActiveBooking(roomId, startTime, endTime) (R2)
+    BookingRepository --> BookingService: overlap result
+    alt overlapping booking exists
+      BookingService --> Student: rejectBooking("time slot unavailable")
+    else slot available
+      BookingService -> BookingRepository: saveBooking(student, roomId, startTime, endTime)
+      BookingRepository --> BookingService: created booking
+      BookingService --> Student: confirmation(created booking) (R4)
+    end
+  end
+end
+note over BookingService
+  R1 requires a future start and duration > 0 and <= 2 hours.
+  A1 (R2 interpretation): half-open intervals; touching bookings do not overlap.
+  A2 (R3 interpretation): blocking prevents new bookings; existing bookings remain.
+  BookingService validates and coordinates; BookingRepository checks and stores bookings.
+end note
+@enduml
