@@ -61,3 +61,12 @@ class BookingTests(unittest.TestCase):
 
     def test_non_integer_start_returns_false_by_declared_assumption(self):
         self.assertIs(can_book(600.5, 660, 540, False, []), False)
+
+    def test_integer_subclass_is_accepted(self):
+        class Minute(int):
+            pass
+
+        self.assertIs(can_book(Minute(600), Minute(660), 540, False, []), True)
+
+    def test_boolean_start_returns_false_by_declared_assumption(self):
+        self.assertIs(can_book(True, 61, 0, False, []), False)

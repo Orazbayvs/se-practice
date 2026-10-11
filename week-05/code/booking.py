@@ -1,5 +1,9 @@
 def can_book(start, end, now, blocked, existing):
     """Return whether the requested time is valid and available."""
+    if (isinstance(start, bool) or not isinstance(start, int)
+            or isinstance(end, bool) or not isinstance(end, int)):
+        return False
+
     if not (0 <= start < end <= 1440 and start > now):
         return False
 

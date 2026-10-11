@@ -88,17 +88,19 @@ Base input for every row unless the row says otherwise: `now=540, blocked=False,
 | 4 | `test_exactly_two_hours_is_allowed` | `(720, 840)` | base | True | AC2 | pass | pass |
 | 5 | `test_over_two_hours_is_rejected` | `(720, 841)` | base | False | AC2 | pass | pass |
 | 6 | `test_starting_now_is_rejected` | `(540, 570)` | base | False | AC1 | pass | pass |
-| 7 | `test_zero_length_is_rejected` | `(600, 600)` | existing `[(700, 760)]` | False | AC1 | pass | pending |
-| 8 | `test_reversed_interval_is_rejected` | `(660, 600)` | existing `[(700, 760)]` | False | AC1 | pass | pending |
-| 9 | `test_end_at_1440_is_allowed` | `(1380, 1440)` | `existing=[]` | True | AC1 | pass | pending |
-| 10 | `test_end_after_1440_is_rejected` | `(1380, 1441)` | `existing=[]` | False | AC1 | pass | pending |
-| 11 | `test_empty_existing_bookings_allow_request` | `(600, 660)` | `existing=[]` | True | AC4 | pass | pending |
-| 12 | `test_overlap_with_second_of_several_bookings_is_rejected` | `(720, 780)` | `existing=[(900, 960), (600, 660), (700, 760)]` | False | AC4 | pass | pending |
-| 13 | `test_request_containing_existing_booking_is_rejected` | `(570, 690)` | base | False | AC4 | pass | pending |
-| 14 | `test_touching_existing_start_is_allowed` | `(570, 600)` | base | True | AC4 | pass | pending |
-| 15 | `test_existing_is_unchanged_after_success` | `(780, 840)` | unsorted three-booking list | True | Contract | pass | pending |
-| 16 | `test_existing_is_unchanged_after_rejection` | `(610, 650)` | unsorted three-booking list | False | Contract | pass | pending |
-| 17 | `test_non_integer_start_returns_false_by_declared_assumption` | `(600.5, 660)` | `existing=[]` | False | §9.2 assumption | fail: True | pending |
+| 7 | `test_zero_length_is_rejected` | `(600, 600)` | existing `[(700, 760)]` | False | AC1 | pass | pass |
+| 8 | `test_reversed_interval_is_rejected` | `(660, 600)` | existing `[(700, 760)]` | False | AC1 | pass | pass |
+| 9 | `test_end_at_1440_is_allowed` | `(1380, 1440)` | `existing=[]` | True | AC1 | pass | pass |
+| 10 | `test_end_after_1440_is_rejected` | `(1380, 1441)` | `existing=[]` | False | AC1 | pass | pass |
+| 11 | `test_empty_existing_bookings_allow_request` | `(600, 660)` | `existing=[]` | True | AC4 | pass | pass |
+| 12 | `test_overlap_with_second_of_several_bookings_is_rejected` | `(720, 780)` | `existing=[(900, 960), (600, 660), (700, 760)]` | False | AC4 | pass | pass |
+| 13 | `test_request_containing_existing_booking_is_rejected` | `(570, 690)` | base | False | AC4 | pass | pass |
+| 14 | `test_touching_existing_start_is_allowed` | `(570, 600)` | base | True | AC4 | pass | pass |
+| 15 | `test_existing_is_unchanged_after_success` | `(780, 840)` | unsorted three-booking list | True | Contract | pass | pass |
+| 16 | `test_existing_is_unchanged_after_rejection` | `(610, 650)` | unsorted three-booking list | False | Contract | pass | pass |
+| 17 | `test_non_integer_start_returns_false_by_declared_assumption` | `(600.5, 660)` | `existing=[]` | False | §9.2 assumption | fail: True | pass |
+| 18 | `test_integer_subclass_is_accepted` | `(Minute(600), Minute(660))` | `existing=[]` | True | AC1 | pass | pass |
+| 19 | `test_boolean_start_returns_false_by_declared_assumption` | `(True, 61)` | `now=0, existing=[]` | False | §9.2 assumption | fail: True | pass |
 
 ---
 
@@ -111,11 +113,57 @@ cause column says why no change was needed.
 | # | Input (the full call) | Expected | Actual | Cause (quote the line) | Fix | Who proposed the fix |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `can_book(600.5, 660, 540, False, [])` | False by my declared assumption | True on v1 | `if not (0 <= start < end <= 1440 and start > now):` lets the float pass its comparisons | reject non-integer start/end before AC1 checks | My input assumption plus assistant implementation |
+| 2 | `can_book(Minute(600), Minute(660), 540, False, [])` | True | False with exact-type guard | `type(start) is not int` rejects an `int` subclass | Use `isinstance` while excluding Boolean values | Assistant's critique, accepted by me |
 
 **The debug prompt I sent, and the assistant's answer** (leave the block empty if you did not use it):
 
-```text
+~~~~text
+Prompt:
+The expected result is False, but I get True. Here are my code and failing test. Explain the cause and propose the smallest fix without changing the contract.
+
+Code:
+```python
+def can_book(start, end, now, blocked, existing):
+    """Return whether the requested time is valid and available."""
+    if not (0 <= start < end <= 1440 and start > now):
+        return False
+
+    if end - start > 120:
+        return False
+
+    if blocked:
+        return False
+
+    for existing_start, existing_end in existing:
+        if start < existing_end and existing_start < end:
+            return False
+
+    return True
 ```
+
+Failing test:
+```python
+def test_non_integer_start_returns_false_by_declared_assumption(self):
+    self.assertIs(can_book(600.5, 660, 540, False, []), False)
+```
+
+Actual output: `AssertionError: True is not False`.
+
+Assistant answer:
+`600.5` passes the current range check: it is greater than `now`, less than `end`, and produces a duration under 120 minutes. The function never checks that `start` and `end` are integers, so it returns `True`. The test supplies a float despite the contract specifying integer times; to make the function reject such inputs, add an integer check to the initial condition:
+
+```python
+if not (
+    isinstance(start, int)
+    and isinstance(end, int)
+    and 0 <= start < end <= 1440
+    and start > now
+):
+    return False
+```
+
+This keeps the contract unchanged and rejects the test’s float input. Note that in Python, `bool` is a subclass of `int`; use `type(start) is int` and `type(end) is int` instead if Boolean values should also be rejected as times.
+~~~~
 
 ---
 
@@ -124,13 +172,12 @@ cause column says why no change was needed.
 **The assistant's critique, pasted unedited:**
 
 ```text
-(paste here)
+- **Issue — rejects integer subclasses:** `if type(start) is not int or type(end) is not int:` rejects values of subclasses of `int`, even when they represent valid integer minutes and satisfy all other checks. The contract requires integer times but does not restrict them to exact built-in `int` objects. This concerns the **function contract**.
 ```
 
 | # | Suggestion | accept / reject | Reason — cite the AC or the contract line | Suite after the change |
 | --- | --- | --- | --- | --- |
-| 1 | | accept / reject | | |
-| 2 | | accept / reject | | |
+| 1 | `type(...) is int` rejects integer subclasses | accept | The contract says integer minutes without restricting values to exact built-in `int`; `test_integer_subclass_is_accepted` failed with exact-type checks. Replaced with `isinstance`, excluding bool separately. | 19 tests pass |
 
 ---
 
@@ -138,7 +185,8 @@ cause column says why no change was needed.
 
 | # | What changed (the line, before → after) | Why | Evidence: the test or check that moved |
 | --- | --- | --- | --- |
-| 1 | | | |
+| 1 | Added integer guard before AC1, then refined it to accept `int` subclasses but reject `bool` | Implement `return-false` for non-integer request times without excluding integer subclasses | Float and Boolean assumption tests pass; the custom `Minute(int)` test also passes. |
+| 2 | Changed exact `type(x) is int` checks to `isinstance(x, int)` with explicit Boolean exclusion | Accept all integer subtypes required by the contract while retaining the selected behavior for Boolean values | `test_integer_subclass_is_accepted` failed on the exact-type guard and passes after this change. |
 
 ---
 
@@ -149,7 +197,30 @@ cause column says why no change was needed.
 Paste the **complete** terminal output. For Python: everything `python -m unittest -v` printed.
 
 ```text
-(paste here)
+test_blocked_room_is_rejected (test_booking.BookingTests.test_blocked_room_is_rejected) ... ok
+test_boolean_start_returns_false_by_declared_assumption (test_booking.BookingTests.test_boolean_start_returns_false_by_declared_assumption) ... ok
+test_empty_existing_bookings_allow_request (test_booking.BookingTests.test_empty_existing_bookings_allow_request) ... ok
+test_end_after_1440_is_rejected (test_booking.BookingTests.test_end_after_1440_is_rejected) ... ok
+test_end_at_1440_is_allowed (test_booking.BookingTests.test_end_at_1440_is_allowed) ... ok
+test_exactly_two_hours_is_allowed (test_booking.BookingTests.test_exactly_two_hours_is_allowed) ... ok
+test_existing_is_unchanged_after_rejection (test_booking.BookingTests.test_existing_is_unchanged_after_rejection) ... ok
+test_existing_is_unchanged_after_success (test_booking.BookingTests.test_existing_is_unchanged_after_success) ... ok
+test_integer_subclass_is_accepted (test_booking.BookingTests.test_integer_subclass_is_accepted) ... ok
+test_non_integer_start_returns_false_by_declared_assumption (test_booking.BookingTests.test_non_integer_start_returns_false_by_declared_assumption) ... ok
+test_over_two_hours_is_rejected (test_booking.BookingTests.test_over_two_hours_is_rejected) ... ok
+test_overlap_with_second_of_several_bookings_is_rejected (test_booking.BookingTests.test_overlap_with_second_of_several_bookings_is_rejected) ... ok
+test_partial_overlap_is_rejected (test_booking.BookingTests.test_partial_overlap_is_rejected) ... ok
+test_request_containing_existing_booking_is_rejected (test_booking.BookingTests.test_request_containing_existing_booking_is_rejected) ... ok
+test_reversed_interval_is_rejected (test_booking.BookingTests.test_reversed_interval_is_rejected) ... ok
+test_starting_now_is_rejected (test_booking.BookingTests.test_starting_now_is_rejected) ... ok
+test_touching_end_is_allowed (test_booking.BookingTests.test_touching_end_is_allowed) ... ok
+test_touching_existing_start_is_allowed (test_booking.BookingTests.test_touching_existing_start_is_allowed) ... ok
+test_zero_length_is_rejected (test_booking.BookingTests.test_zero_length_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.000s
+
+OK
 ```
 
 ### 8.2 The checker, final run
@@ -186,21 +257,21 @@ The same IDs as `known_fails` in `submission.yml`. Write `none` if the run is cl
 
 | Check | Why it stays |
 | --- | --- |
-| | |
+| none | No checker failures remain. |
 
 ### 9.2 Outside the contract
 
 The contract says times are integers. It does not say what `can_book` does when one is not —
 `600.5`, or the string `"600"`. What does **your** function do, and why is that the right call?
 
--
+- I choose `return-false`: Python floats such as `600.5` pass ordinary range comparisons, so the function explicitly rejects non-integer `start` or `end`. The contract leaves this case open; this is my declared assumption, not an AC.
 
 ### 9.3 A bound that never decides
 
 One of the bounds written in AC1 can never be the *only* reason a request is rejected. Which one,
 and why?
 
--
+- AC1's lower bound `0 <= start` cannot be the only rejection reason. Because `now` is valid and at least 0, and AC1 also requires `start > now`, any acceptable start is already greater than 0. A request with `start=0` fails the future-time condition first.
 
 ---
 
