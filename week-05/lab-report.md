@@ -178,6 +178,7 @@ This keeps the contract unchanged and rejects the test’s float input. Note tha
 | # | Suggestion | accept / reject | Reason — cite the AC or the contract line | Suite after the change |
 | --- | --- | --- | --- | --- |
 | 1 | `type(...) is int` rejects integer subclasses | accept | The contract says integer minutes without restricting values to exact built-in `int`; `test_integer_subclass_is_accepted` failed with exact-type checks. Replaced with `isinstance`, excluding bool separately. | 19 tests pass |
+| 2 | No second issue was raised in the assistant's critique. | N/A | I did not invent another suggestion; the checker requires two judged points, so L6 is disclosed below. | No change needed |
 
 ---
 
@@ -229,7 +230,47 @@ Paste the **complete** output of `python tests/check_booking.py`. Paste it **las
 this file afterwards, run the checker again and paste again.
 
 ```text
-(paste here)
+Week 05 - can_book: the function, your tests, the evidence   (Path A)
+
+PASS   F1   the six cases from the task table           6 of 6 cases
+PASS   F2   AC1 time order and day bounds               5 of 5 cases
+PASS   F3   AC1 the start is in the future              5 of 5 cases
+PASS   F4   AC2 at most 120 minutes                     3 of 3 cases
+PASS   F5   AC3 a blocked room accepts nothing          2 of 2 cases
+PASS   F6   AC4 every kind of overlap is rejected       5 of 5 cases
+PASS   F7   AC4 touching endpoints are allowed          3 of 3 cases
+PASS   F8   AC4 every existing booking is checked       4 of 4 cases
+PASS   F9   AC5 the result is a real Boolean            3 of 3 cases
+PASS   F10  AC5 the inputs are left unchanged           2 of 2 cases
+PASS   O1   the assistant's first version is kept       v1 kept (16 lines)
+PASS   S1   your suite has at least 11 tests            19 tests
+PASS   S2   your suite is green on your own code        19 tests, OK
+PASS   M1   your tests catch a fault in AC1             caught by test_starting_now_is_rejected
+PASS   M2   your tests catch a fault in AC1             caught by test_end_after_1440_is_rejected
+PASS   M3   your tests catch a fault in AC1             caught by test_zero_length_is_rejected
+PASS   M4   your tests catch a fault in AC2             caught by test_exactly_two_hours_is_allowed
+PASS   M5   your tests catch a fault in AC3             caught by test_blocked_room_is_rejected
+PASS   M6   your tests catch a fault in AC4             caught by test_touching_end_is_allowed, test_touching_existing_start_is_allowed
+PASS   M7   your tests catch a fault in AC4             caught by test_existing_is_unchanged_after_rejection, test_overlap_with_second_of_several_bookings_is_rejected
+PASS   M8   your tests catch a fault in AC4             caught by test_request_containing_existing_booking_is_rejected
+PASS   M9   your tests catch a fault in AC5             caught by test_existing_is_unchanged_after_success
+PASS   M10  your tests catch a fault in AC5             caught by test_existing_is_unchanged_after_rejection, test_existing_is_unchanged_after_success
+PASS   L1   report 1: tool, model and language          tool, model and language recorded
+PASS   L2   report 2: the plan, and what you corrected  plan pasted, 1 row(s) on what you corrected or verified
+PASS   L3   report 3: v1 mapped to AC1-AC4              5 conditions mapped, AC1-AC4 all present
+PASS   L4   report 4: at least 11 of your tests listed  19 tests listed
+PASS   L5   report 5: debugging evidence                2 row(s) of input / expected / actual
+FAIL   L6   report 6: the critique, each point judged   section 6 needs the critique pasted and at least 2 points marked accept or reject with a reason (found 1)
+PASS   L7   report 7: change log                        2 change-log row(s)
+PASS   L8   report 8.1: real output of your suite       suite output pasted
+PASS   L9   report 10: conclusion of 120-180 words      149 words
+------------------------------------------------------------------------------
+v1 (code/original/booking_v1.py): passes F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 - fails nothing - identical to your final: no
+Not counted for M - these fail on a can_book that follows the contract exactly, so they
+test what the contract leaves open or contradict an AC: test_boolean_start_returns_false_by_declared_assumption, test_non_integer_start_returns_false_by_declared_assumption
+SUMMARY pass=31 fail=1 error=0   (32 checks)
+Every FAIL or ERROR you keep goes in lab-report.md section 9 and in submission.yml known_fails.
+One you report and explain costs you nothing. One you hide costs the whole criterion.
 ```
 
 ### 8.3 Path B only — three faults I planted myself
@@ -257,7 +298,7 @@ The same IDs as `known_fails` in `submission.yml`. Write `none` if the run is cl
 
 | Check | Why it stays |
 | --- | --- |
-| none | No checker failures remain. |
+| L6 | The assistant returned one concrete critique point; I judged it and did not invent a second suggestion just to satisfy the shape check. |
 
 ### 9.2 Outside the contract
 
@@ -288,3 +329,4 @@ and why?
      side, so a booking that ends exactly when another begins was rejected." -->
 
 <!-- Write your conclusion below this line -->
+In this practice, I analyzed and verified the can_book function against the provided contract and criteria AC1–AC5. The core overlap condition, start < existing_end and existing_start < end, effectively detects conflicting intervals for half-open ranges. Because boundaries are exclusive at the end, touching endpoints evaluate to False under strict inequality, correctly allowing adjacent bookings. During testing, initial code v1 successfully passed all standard specification checks (F1–F10). However, custom boundary tests for unspecified contract behavior revealed that floating-point inputs required explicit handling. Subsequently, code critique identified that using exact type(x) is int checks prematurely rejected valid custom int subclasses. Adding a test for int subclasses prompted us to refine the implementation using isinstance(x, int) while explicitly excluding bool instances. Finally, regarding unspecified contract behavior, I decided to return False for non-integer inputs. This experience highlighted the necessity of rigorous boundary testing beyond initial AI-generated code.
