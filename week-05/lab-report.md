@@ -29,7 +29,16 @@ grader find your answers by them. Add rows to any table; never remove its header
 **The assistant's plan, pasted unedited:**
 
 ```text
-(paste here)
+### Implementation plan
+1. Check AC1: `0 <= start < end <= 1440` and `start > now`; otherwise return `False`.
+2. Check AC2: duration `end - start` is at most 120 minutes; otherwise return `False`.
+3. Check AC3: return `False` if the room is blocked.
+4. Check AC4: return `False` if any existing interval overlaps the requested interval. Treat intervals as `[start, end)`, so touching endpoints are allowed.
+5. Return `True` only if all checks pass. Do not modify any inputs.
+
+**Assumptions:** `now` is valid, `blocked` is Boolean, and `existing` contains valid bookings for this room, as stated. Invalid requested times return `False`.
+
+**Boundary cases to test:** start equal to `now` versus `now + 1`; start at `0`; end at `1440`; equal start and end; duration exactly 120 versus 121; existing booking ending exactly at the requested start or starting exactly at the requested end; and overlaps by one minute at either endpoint. Also verify that `existing` remains unchanged.
 ```
 
 **What the plan invented or changed.** One row for every rule in the plan that is not in the
@@ -38,11 +47,11 @@ row saying which lines of the plan you checked against which AC.
 
 | # | What the plan said | What the contract or the AC says | What I did |
 | --- | --- | --- | --- |
-| 1 | | | |
+| 1 | The plan says invalid requested times return `False` and tests `start=0`; | AC5 says return False otherwise, but because `now >= 0`, `start=0` cannot satisfy `start > now`. Contract input types make non-integer handling open. | Kept False for invalid integer requests per AC5; selected and disclosed `return-false` for non-integer input as an explicit assumption, not as a claimed AC. |
 
 **Boundary cases the assistant suggested that I kept as tests:**
 
--
+- Kept: `start == now` / `now + 1`, `end == 1440`, equal endpoints, durations 120 / 121, both touching directions, overlap by one minute, unchanged `existing`.
 
 ---
 
