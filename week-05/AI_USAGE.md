@@ -6,9 +6,9 @@ including anything an AI tool produced.
 
 | Tool | Exact model / plan | Used for | Which files it touched |
 | --- | --- | --- | --- |
-| Copilot SDK in VS Code | not displayed | the plan (Task 1) | lab-report.md |
-| Copilot SDK in VS Code | not displayed | the first version, v1 (Task 2) | code/original/booking_v1.py, code/booking.py, lab-report.md |
-| Copilot SDK in VS Code | not displayed | boundary tests, debugging and critique (Tasks 3–5) | code/test_booking.py, code/booking.py, lab-report.md |
+| Copilot SDK in VS Code | GPT-6 Luna | the plan (Task 1) | lab-report.md |
+| Copilot SDK in VS Code | GPT-6 Luna | the first version, v1 (Task 2) | code/original/booking_v1.py, code/booking.py, lab-report.md |
+| Copilot SDK in VS Code | GPT-6 Luna | boundary tests, debugging and critique (Tasks 3–5) | code/test_booking.py, code/booking.py, lab-report.md |
 
 **The assistant wrote, or helped write, my tests in `code/`:** yes
 <!-- Either answer is allowed. If "yes": say which tests, and how you checked that their EXPECTED

@@ -14,7 +14,7 @@ grader find your answers by them. Add rows to any table; never remove its header
 | | |
 | --- | --- |
 | Assistant (tool) | Copilot SDK in VS Code |
-| **Exact** model name | not displayed |
+| **Exact** model name | GPT-6 Luna |
 | Language and version | Python 3.14.6 |
 | Path | A |
 | My Week 04 declaration for touching bookings | allowed |
