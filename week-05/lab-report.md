@@ -57,21 +57,22 @@ row saying which lines of the plan you checked against which AC.
 
 ## 3. Task 2 — the first version (v1), read before it was run
 
-v1 is saved as `code/original/booking_v1.<ext>`, exactly as the assistant returned it: yes / no
+v1 is saved as `code/original/booking_v1.py`, exactly as the assistant returned it: yes
 
 **AC map.** One row per condition in v1. Quote the line.
 
 | # | Line in v1 | AC it implements | Correct as written? If not, why |
 | --- | --- | --- | --- |
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
+| 1 | `if not (0 <= start < end <= 1440 and start > now):` | AC1 | Correct for integer inputs. |
+| 2 | `if end - start > 120:` | AC2 | Correct: exactly 120 remains allowed. |
+| 3 | `if blocked:` | AC3 | Correct: blocked room returns False. |
+| 4 | `if start < existing_end and existing_start < end:` | AC4 | Correct for half-open intervals; strict inequalities allow touching. |
+| 5 | `return True` after the loop | AC5 | Correct: reached only after all criteria pass; no input is mutated. |
 
 **Anything in v1 that no AC asks for** (extra validation, a buffer between bookings, logging,
 saving the booking, a different return type):
 
--
+- No extra behavior: the function only validates, checks overlap, and returns a Boolean.
 
 ---
 
