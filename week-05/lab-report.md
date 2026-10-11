@@ -88,11 +88,17 @@ Base input for every row unless the row says otherwise: `now=540, blocked=False,
 | 4 | `test_exactly_two_hours_is_allowed` | `(720, 840)` | base | True | AC2 | pass | pass |
 | 5 | `test_over_two_hours_is_rejected` | `(720, 841)` | base | False | AC2 | pass | pass |
 | 6 | `test_starting_now_is_rejected` | `(540, 570)` | base | False | AC1 | pass | pass |
-| 7 | | | | | | | |
-| 8 | | | | | | | |
-| 9 | | | | | | | |
-| 10 | | | | | | | |
-| 11 | | | | | | | |
+| 7 | `test_zero_length_is_rejected` | `(600, 600)` | existing `[(700, 760)]` | False | AC1 | pass | pending |
+| 8 | `test_reversed_interval_is_rejected` | `(660, 600)` | existing `[(700, 760)]` | False | AC1 | pass | pending |
+| 9 | `test_end_at_1440_is_allowed` | `(1380, 1440)` | `existing=[]` | True | AC1 | pass | pending |
+| 10 | `test_end_after_1440_is_rejected` | `(1380, 1441)` | `existing=[]` | False | AC1 | pass | pending |
+| 11 | `test_empty_existing_bookings_allow_request` | `(600, 660)` | `existing=[]` | True | AC4 | pass | pending |
+| 12 | `test_overlap_with_second_of_several_bookings_is_rejected` | `(720, 780)` | `existing=[(900, 960), (600, 660), (700, 760)]` | False | AC4 | pass | pending |
+| 13 | `test_request_containing_existing_booking_is_rejected` | `(570, 690)` | base | False | AC4 | pass | pending |
+| 14 | `test_touching_existing_start_is_allowed` | `(570, 600)` | base | True | AC4 | pass | pending |
+| 15 | `test_existing_is_unchanged_after_success` | `(780, 840)` | unsorted three-booking list | True | Contract | pass | pending |
+| 16 | `test_existing_is_unchanged_after_rejection` | `(610, 650)` | unsorted three-booking list | False | Contract | pass | pending |
+| 17 | `test_non_integer_start_returns_false_by_declared_assumption` | `(600.5, 660)` | `existing=[]` | False | §9.2 assumption | fail: True | pending |
 
 ---
 
@@ -104,7 +110,7 @@ cause column says why no change was needed.
 
 | # | Input (the full call) | Expected | Actual | Cause (quote the line) | Fix | Who proposed the fix |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | | | | |
+| 1 | `can_book(600.5, 660, 540, False, [])` | False by my declared assumption | True on v1 | `if not (0 <= start < end <= 1440 and start > now):` lets the float pass its comparisons | reject non-integer start/end before AC1 checks | My input assumption plus assistant implementation |
 
 **The debug prompt I sent, and the assistant's answer** (leave the block empty if you did not use it):
 
