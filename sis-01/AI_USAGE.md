@@ -7,7 +7,7 @@ live in `report.md`, section 8 — this file is the summary, not a second copy.
 
 | Tool | Exact model / plan | Used for | Which sections it touched |
 | --- | --- | --- | --- |
-| Copilot SDK in VS Code | not displayed | Prompts A, B and C; scenario framing; drafting and revising the report; organizing source checks | report.md sections 1–4 and 8–9 |
+| Copilot SDK in VS Code | not displayed | Prompts A, B and C; scenario framing; drafting and revising the report; locating sources and organizing checks | report.md sections 1–4, 6, and 8–9 |
 
 **Two parts of this assignment are yours alone. Both were written without AI assistance:** yes
 <!-- The initial outline (report.md section 7, written BEFORE Prompt A) and the reflection
@@ -16,10 +16,11 @@ live in `report.md`, section 8 — this file is the summary, not a second copy.
 
 **Every source in section 6 is one I opened and read myself:** yes
 
-**Everything I submitted, I can explain and defend without consulting the assistant:** yes / no
+**Everything I submitted, I can explain and defend without consulting the assistant:** yes
 
 **Anything I accepted from the AI without fully understanding it:**
 <!-- Name the section and the sentence. "Nothing" is a valid answer only if it is true. -->
+Nothing.
 
-Signed: <your name>
+Signed: Orazbay Koibagar
 Date: 2026-10-08
