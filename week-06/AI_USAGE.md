@@ -16,10 +16,10 @@ including anything an AI tool produced.
 **Every screenshot in `evidence/` is an unedited capture of the page as it behaved:** yes
 
 **I can explain the component I chose in lab-report.md section 8 — and how the page decides
-availability — without the assistant:** not yet confirmed; student must answer honestly after writing section 8.
+availability — without the assistant:** yes
 
 **Anything I accepted from the AI without fully understanding it:**
-The student must review `src/lib/availability.ts`, especially why the overlap check is skipped for intervals longer than 120 minutes, and confirm they understand this behavior before submission.
+None. The accepted duration check and overlap-check condition are explained in `lab-report.md` section 8.
 
-Signed: (student to fill in)
+Signed: Orazbay
 Date: 2026-10-16

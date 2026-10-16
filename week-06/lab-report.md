@@ -1,8 +1,8 @@
 # Week 06 — Lab report
 
-**Name:**
-**Group:**
-**Date:**
+**Name:** Orazbay
+**Group:** CSCI-2208 Software Engineering — Fall 2026
+**Date:** 2026-10-16
 
 Fill in every section. **Do not delete, rename or renumber the headings** — the checker and the
 grader find your answers by them. Add rows to any table; never remove its header.
@@ -17,7 +17,7 @@ grader find your answers by them. Add rows to any table; never remove its header
 | Exact model (as Bolt shows it, or `not displayed`) | not displayed |
 | Bolt project link (or `not shared`, and why) | https://bolt.new/~/sb1-byt5w3qv (login required); published preview: https://smart-campus-room-av-iqh7.bolt.host/ |
 | Browser and version | Safari (version not recorded) |
-| If you could not use Bolt.new: the tool you used instead, and why | |
+| If you could not use Bolt.new: the tool you used instead, and why | Not applicable; Bolt.new was used. |
 
 ---
 
