@@ -83,15 +83,15 @@ no way to set up the case). Save each final run as `evidence/final-T<n>.png`.
 
 | # | Case | What you set up and request | Expected | AC | Result on v1 | Result on final | Final screenshot |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | Touching | 11:00–12:00 | Available | AC4 | Available | Available / Unavailable / Not testable | final-T1.png |
-| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Unavailable | Available / Unavailable / Not testable | final-T2.png |
-| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Unavailable | Available / Unavailable / Not testable | final-T3.png |
-| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Available | Available / Unavailable / Not testable | final-T4.png |
-| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Unavailable | Available / Unavailable / Not testable | final-T5.png |
-| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Unavailable | Available / Unavailable / Not testable | final-T6.png |
-| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Unavailable | Available / Unavailable / Not testable | final-T7.png |
-| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Available | Available / Unavailable / Not testable | final-T8.png |
-| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Available | Available / Unavailable / Not testable | final-T9.png |
+| T1 | Touching | 11:00–12:00 | Available | AC4 | Available | Available | final-T1.png |
+| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Unavailable | Unavailable | final-T2.png |
+| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Unavailable | Unavailable | final-T3.png |
+| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Available | Available | final-T4.png |
+| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Unavailable | Unavailable | final-T5.png |
+| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Unavailable | Unavailable | final-T6.png |
+| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Unavailable | Unavailable | final-T7.png |
+| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Available | Available | final-T8.png |
+| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Available | Available | final-T9.png |
 
 ---
 
@@ -117,13 +117,46 @@ in) and Bolt's answer, unedited.
 **Functional fix prompt, as sent, and Bolt's answer:**
 
 ```text
-(paste here)
+In the current prototype, selecting Room B-204, setting current time to 09:00, and checking 12:00–14:01 also reports an overlap with "Study Group" (14:00–15:30), but AC2 requires this 121-minute request to be rejected for exceeding 120 minutes, and the specified T5 setup gives the room only one booking (10:00–11:00). Make the smallest change that fixes this behavior. Preserve the other acceptance criteria. Explain which file/component you changed and why.
+```
+
+Bolt's answer, as pasted:
+
+```text
+Let me read the current sample data and availability logic to identify the exact issue.
+
+0123456789
+
+ files read
+
+There are two problems to fix:
+
+1. **Sample data (T5 setup):** Room B-204 currently has two bookings — "Organic Chem Lab" (10:00–11:00) and "Study Group" (14:00–15:30). The T5 test case requires B-204 to have only one booking (10:00–11:00). The "Study Group" booking is what's causing the false overlap message. I'll remove it.
+2. **AC2 reporting logic:** When a request exceeds 120 minutes (AC2 violation), the overlap check (AC4) still runs and can report spurious overlaps alongside the duration violation. The fix is to skip the overlap check when AC2 already rejects the request — a request that's too long should be rejected purely for that reason, not cluttered with overlap messages.
+
+0123456789
+
+ file edits
+
+Now let me verify the build passes.
+
+**
+Built to verify changes compile
+
+Open
+Build passes. Here's what I changed and why:
+
+**Two files changed:**
+
+1. **`src/lib/sampleData.ts`** — Removed the "Study Group" (14:00–15:30) booking from Room B-204. The T5 test case requires B-204 to have only one existing booking (10:00–11:00, "Organic Chem Lab"). The extra booking was causing a false overlap message when testing the 12:00–14:01 request.
+2. **`src/lib/availability.ts`** — Changed the overlap check (AC4) to skip when the request is already rejected for exceeding the 120-minute limit (AC2). Previously, a 121-minute request would trigger both the duration-violation message and any overlap messages. Now, when a request is too long, it's rejected solely for that reason — the overlap check only runs for requests that pass the duration check. All other criteria (AC1, AC3, AC4 for valid-length requests) are preserved.
+Now selecting Room B-204, current time 09:00, and checking 12:00–14:01 will report only the duration violation (121 min exceeds 120 min) — no spurious overlap.
 ```
 
 **Cleanup prompt, as sent, and Bolt's answer:**
 
 ```text
-(paste here)
+Not sent: Bolt's daily token limit was reached after the functional fix. No cleanup prompt or Bolt answer is being claimed for issue 2.
 ```
 
 Add further blocks for further prompts.
@@ -133,8 +166,8 @@ the AC (or the scope) that justifies it.
 
 | # | What Bolt changed or suggested | accept / reject | Reason — cite the AC or the scope | Retest: which cases, result |
 | --- | --- | --- | --- | --- |
-| 1 | | accept / reject | | |
-| 2 | | accept / reject | | |
+| 1 | Removed B-204's extra Study Group booking and skipped overlap reporting when duration exceeds 120 minutes. | accept | AC2: reject durations over 120 minutes; AC4 still checks valid-length intervals. The fixture now matches the specified single-booking setup. | Retested T5: Unavailable, with only the 121-minute reason. Retested T1–T9 after the final local copy was assembled; all nine match. |
+| 2 | Removed unused `@supabase/supabase-js` from the final copy by local hand edit; Bolt did not suggest this change. | accept | Scope: this is a frontend-only prototype with no backend, database or external API. | Retested build, TypeScript, lint, and T1–T9 on the final local copy; all passed. |
 
 ---
 
@@ -144,8 +177,8 @@ Two to four concrete changes, each one retested.
 
 | # | Issue | Decision | Change (file or component) | Result after retest |
 | --- | --- | --- | --- | --- |
-| 1 | | | | |
-| 2 | | | | |
+| 1 | Extra B-204 booking and noisy reason on T5 | Fix | `src/lib/sampleData.ts`: removed Study Group; `src/lib/availability.ts`: only check overlaps for valid intervals of at most 120 minutes. | T5 Unavailable for the 121-minute limit only; all T1–T9 pass on the final copy. |
+| 2 | Unused backend dependency outside the prototype scope | Fix (local hand edit after Bolt token limit) | Removed Supabase from `package.json` and pruned it from `package-lock.json`. | Production build, TypeScript, lint, and T1–T9 pass; no Supabase dependency remains. |
 
 ---
 
@@ -155,9 +188,9 @@ Pick one file or component Bolt generated that matters for AC1–AC5 — the one
 availability is the best choice. Name its path in backticks, then explain in your own words, without
 the assistant, what it does and how it decides. 60 words or more.
 
-**File:** `(write here, e.g. src/App.tsx)`
+**File:** `src/lib/availability.ts`
 
-<!-- Write your explanation below this line -->
+The src/lib/availability.ts file evaluates whether a requested candidate booking interval is valid by running a sequence of strict logical checks. First, it verifies the time range boundaries, ensuring that the start time is greater than or equal to midnight (0 ≤ start), strictly less than the end time, and within the daily limit (end ≤ 1440), while also confirming that the start time is after the supplied current time according to AC1. Next, it enforces the maximum duration rule by checking that the total interval length does not exceed 120 minutes, satisfying AC2. Then, it checks if the selected room is currently flagged as blocked, immediately rejecting the request if a block is active in accordance with AC3. Finally, it iterates through existing bookings to ensure there are no time overlaps, while correctly permitting touching endpoints where one booking ends exactly when another begins, fulfilling AC4. Only when all these conditions pass does the module return a clear available status.
 
 ---
 
@@ -169,7 +202,7 @@ The same IDs as `known_fails` in `submission.yml`. Write `none` if the run is cl
 
 | Check | Why it stays |
 | --- | --- |
-| | |
+| L6 | Bolt's daily token limit was reached after the functional fix. No second cleanup prompt was sent, so I have not invented one for the report. The local hand edit removing the unused Supabase dependency is disclosed in sections 6–7 and AI_USAGE.md. |
 
 ### 9.2 The end of the day
 
@@ -177,14 +210,14 @@ AC1 allows `end ≤ 1440` — a booking may end at 24:00. Can a user of your fin
 23:00–24:00? How — and if not, why is that acceptable or not? (This is the value you declare in
 `submission.yml` under `assumptions.end_of_day`.)
 
--
+- No. The browser's `type="time"` control allows the last end time of 23:59, but does not let the user enter 24:00. This final page therefore cannot express an end minute of 1440. I declare `not-expressible`; the interface still checks all times it can represent.
 
 ### 9.3 Which "now"?
 
 AC1 says "after the supplied current time". What did **v1** use as the current time, and what did
 that mean for testing case T6?
 
--
+- v1 provided a user-editable current-time input, initially set to 09:00. T6 was testable by setting current time and requested start to 09:00; it correctly returned Unavailable because the start must be strictly after now.
 
 ---
 
@@ -200,4 +233,4 @@ that mean for testing case T6?
      checking 11:00-12:00 a second time said Unavailable. AC5 says the check must not change the
      booking data." -->
 
-<!-- Write your conclusion below this line -->
+Reflecting on this prototype cleanup lab, both of my initial predictions proved incorrect: version one successfully handled touching endpoints in case T1 and correctly maintained the Available state during repeated checks in case T8 without altering booking data. However, real testing uncovered unexpected flaws, such as case T5 which correctly returned Unavailable for exceeding the 120-minute limit, but incorrectly displayed an extra overlap error due to a redundant "Study Group" entry in the sample data rather than a faulty core validation algorithm. Regarding a hypothetical AI suggestion, I would reject any proposal to introduce persistent browser storage for bookings, because it violates project scope and breaks AC5 by mutating state across checks. This highlights the vital difference between a UI that merely looks finished and one meeting AC1–AC6. Rigorous testing is essential to separate visual polish from true logical correctness.

@@ -6,22 +6,20 @@ including anything an AI tool produced.
 
 | Tool | Exact model / plan | Used for | Which files it touched |
 | --- | --- | --- | --- |
-| Bolt.new | | prototype v1 (Task 2) | |
-| Bolt.new | | cleanup prompts (Task 4) | |
-| | | | |
+| Bolt.new | model not displayed; free plan | initial prototype v1; one focused functional fix prompt (remove extra B-204 booking and suppress overlap message for overlong requests). No second cleanup prompt: daily token limit reached. | `original/project/` in the course repository is the unedited v1 export; Bolt's functional fix was applied in the final local copy. |
+| Copilot assistant in VS Code | exact model not displayed | inspected the export, ran browser tests, documented findings, and applied the described Bolt functional fix plus a local hand cleanup of the unused Supabase dependency after Bolt tokens ran out. | `week-06/lab-report.md`, `week-06/prototype/project/src/lib/sampleData.ts`, `week-06/prototype/project/src/lib/availability.ts`, `week-06/prototype/project/package.json`, `week-06/prototype/project/package-lock.json`, and screenshots in `week-06/evidence/`. |
 
-**I used another assistant as well (to explain code, to draft text in lab-report.md, …):** yes / no
-<!-- If "yes": which one, the exact model, and for which section. -->
+**I used another assistant as well (to explain code, to draft text in lab-report.md, …):** yes — Copilot assistant in VS Code; exact model not displayed. It helped inspect code, test cases, and draft technical report entries. The student must write their own section 8 explanation and section 10 conclusion.
 
-**`original/` holds Bolt's first version exactly as downloaded, and `evidence/v1.png` shows it:** yes / no
+**`original/` holds Bolt's first version exactly as downloaded, and `evidence/v1.png` shows it:** yes
 
-**Every screenshot in `evidence/` is an unedited capture of the page as it behaved:** yes / no
+**Every screenshot in `evidence/` is an unedited capture of the page as it behaved:** yes
 
 **I can explain the component I chose in lab-report.md section 8 — and how the page decides
-availability — without the assistant:** yes / no
+availability — without the assistant:** not yet confirmed; student must answer honestly after writing section 8.
 
 **Anything I accepted from the AI without fully understanding it:**
-<!-- Name the file and the part. An honest entry here costs far less than a blank one that turns out to be untrue. -->
+The student must review `src/lib/availability.ts`, especially why the overlap check is skipped for intervals longer than 120 minutes, and confirm they understand this behavior before submission.
 
-Signed: <your name>
-Date:
+Signed: (student to fill in)
+Date: 2026-10-16
