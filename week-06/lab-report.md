@@ -14,9 +14,9 @@ grader find your answers by them. Add rows to any table; never remove its header
 | | |
 | --- | --- |
 | Tool | Bolt.new |
-| Exact model (as Bolt shows it, or `not displayed`) | |
-| Bolt project link (or `not shared`, and why) | |
-| Browser and version | |
+| Exact model (as Bolt shows it, or `not displayed`) | not displayed |
+| Bolt project link (or `not shared`, and why) | https://bolt.new/~/sb1-byt5w3qv (login required); published preview: https://smart-campus-room-av-iqh7.bolt.host/ |
+| Browser and version | Safari (version not recorded) |
 | If you could not use Bolt.new: the tool you used instead, and why | |
 
 ---
@@ -28,8 +28,8 @@ Fill the first three columns now; fill the last one after Task 3.
 
 | # | What I expect to go wrong | AC it concerns | Was I right? (after Task 3) |
 | --- | --- | --- | --- |
-| 1 | The checker may treat a request that starts when an existing booking ends as overlapping. | AC4 | |
-| 2 | Checking an available interval may add it to the bookings, making the same check unavailable the second time. | AC5 | |
+| 1 | The checker may treat a request that starts when an existing booking ends as overlapping. | AC4 | No — T1 was Available. |
+| 2 | Checking an available interval may add it to the bookings, making the same check unavailable the second time. | AC5 | No — both T8 checks were Available. |
 
 **The initial prompt exactly as I sent it** — the deck's prompt with AC1–AC6 pasted in place of
 `[paste AC1–AC6]`, nothing else changed:
@@ -48,17 +48,23 @@ AC6: The page remains usable at desktop and narrow/mobile width and gives unders
 ## 3. Task 2 — prototype v1
 
 v1 export saved in `original/` and screenshot saved as `evidence/v1.png` **before** any cleanup
-prompt: yes / no
+prompt: yes
 
 **Bolt's list of the files/components it created, pasted unedited:**
 
 ```text
-(paste here)
+src/lib/types.ts — type definitions for rooms and bookings
+src/lib/sampleData.ts — five fictional rooms and six sample bookings
+src/lib/availability.ts — the availability-checking logic (AC1–AC4)
+src/App.tsx — the full UI with room selector, time inputs, result panel, and room info sidebar
 ```
 
 **What v1 does — one line per thing that works, or visibly does not:**
 
--
+- The user can select one of five fictional rooms, set current/start/end times, and request an availability decision.
+- The page reports Available or Unavailable with explanatory feedback and shows the selected room's details and existing bookings.
+- The app does not modify the displayed bookings when checking the same request twice.
+- The sample-data room with the 10:00–11:00 booking also has a second booking from 14:00–15:30, so it does not exactly match the required single-booking test fixture.
 
 **Repair prompt** (only if the first build did not run — the deck allows one, then the result is
 v1). Leave empty if you did not need it:
@@ -77,15 +83,15 @@ no way to set up the case). Save each final run as `evidence/final-T<n>.png`.
 
 | # | Case | What you set up and request | Expected | AC | Result on v1 | Result on final | Final screenshot |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | Touching | 11:00–12:00 | Available | AC4 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T1.png |
-| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T2.png |
-| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T3.png |
-| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T4.png |
-| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T5.png |
-| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T6.png |
-| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T7.png |
-| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T8.png |
-| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T9.png |
+| T1 | Touching | 11:00–12:00 | Available | AC4 | Available | Available / Unavailable / Not testable | final-T1.png |
+| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Unavailable | Available / Unavailable / Not testable | final-T2.png |
+| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Unavailable | Available / Unavailable / Not testable | final-T3.png |
+| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Available | Available / Unavailable / Not testable | final-T4.png |
+| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Unavailable | Available / Unavailable / Not testable | final-T5.png |
+| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Unavailable | Available / Unavailable / Not testable | final-T6.png |
+| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Unavailable | Available / Unavailable / Not testable | final-T7.png |
+| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Available | Available / Unavailable / Not testable | final-T8.png |
+| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Available | Available / Unavailable / Not testable | final-T9.png |
 
 ---
 
@@ -98,8 +104,8 @@ log a justified cleanup that preserves behaviour. Save a screenshot of each as
 
 | # | Issue | Evidence: steps → expected → observed | Priority | Decision |
 | --- | --- | --- | --- | --- |
-| 1 | | | High / Medium / Low | Fix / Reject / Defer |
-| 2 | | | High / Medium / Low | Fix / Reject / Defer |
+| 1 | The B-204 sample fixture has an extra booking, so the assigned duration test is not isolated. | Select B-204 and check 12:00–14:01 with current time 09:00 → expect the >120-minute rejection against the sole 10:00–11:00 booking → observed both the duration rejection and an overlap with Study Group (14:00–15:30); see `evidence/issue-1.png`. | Medium | Fix |
+| 2 | The unused Supabase dependency is out of scope and triggers the checker's backend/database scope finding. | Inspect `original/project/package.json` dependencies → expect no backend/database dependency for this frontend-only prototype → observed `@supabase/supabase-js` despite no use in application code; see `evidence/issue-2.png`. | Medium | Fix |
 
 ---
 
