@@ -1,0 +1,42 @@
+@startuml
+title Course registration — sequence draft
+
+actor Student
+boundary CatalogUI
+control CourseCatalog
+control RegistrationService
+entity CourseOffering
+entity Enrollment
+
+Student -> CatalogUI: browseCatalog(semester)
+CatalogUI -> CourseCatalog: listOfferings(semester)
+CourseCatalog -> CourseOffering: getOfferingsFor(semester)
+CourseOffering --> CourseCatalog: offeringDetails(code, title, section, availablePlaces)
+CourseCatalog --> CatalogUI: catalog(offerings, availablePlaces)
+CatalogUI --> Student: displayCatalog(offerings)
+
+Student -> CatalogUI: selectOffering(offeringId)
+Student -> CatalogUI: register(offeringId)
+CatalogUI -> RegistrationService: register(studentId, offeringId)
+
+critical atomic registration — final checks and creation
+  RegistrationService -> Enrollment: checkDuplicate(studentId, offeringId)
+  Enrollment --> RegistrationService: duplicateStatus
+  alt already enrolled
+    RegistrationService --> CatalogUI: reject("already enrolled")
+  else not already enrolled
+    RegistrationService -> CourseOffering: checkCurrentCapacity(offeringId)
+    CourseOffering --> RegistrationService: availablePlaces
+    alt course full
+      RegistrationService --> CatalogUI: reject("course full")
+    else not enrolled and places left
+      create Enrollment
+      RegistrationService -> Enrollment: createEnrollment(studentId, offeringId)
+      Enrollment --> RegistrationService: enrollment
+      RegistrationService -> CourseOffering: updateAvailability()
+      RegistrationService --> CatalogUI: confirm(enrollment)
+    end
+  end
+end
+CatalogUI --> Student: showResult()
+@enduml
