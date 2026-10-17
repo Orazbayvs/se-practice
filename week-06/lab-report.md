@@ -2,7 +2,7 @@
 
 **Name:** Orazbay
 **Group:** CSCI-2208 Software Engineering — Fall 2026
-**Date:** 2026-10-16
+**Date:** 2026-10-18
 
 Fill in every section. **Do not delete, rename or renumber the headings** — the checker and the
 grader find your answers by them. Add rows to any table; never remove its header.
@@ -156,7 +156,43 @@ Now selecting Room B-204, current time 09:00, and checking 12:00–14:01 will re
 **Cleanup prompt, as sent, and Bolt's answer:**
 
 ```text
-Not sent: Bolt's daily token limit was reached after the functional fix. No cleanup prompt or Bolt answer is being claimed for issue 2.
+The current app is a standalone, one-page room availability checker with no backend or database. Remove the unused Supabase dependency from the project, including updating the lockfile. First confirm that no application code imports or uses Supabase. Do not change the UI, sample data, availability logic, or any other dependencies. Then run the available build/check and tell me exactly what you changed and whether it passed.
+```
+
+Bolt's answer, as pasted:
+
+```text
+Let me first confirm no application code imports or uses Bolt Database.
+
+**
+Searched
+`supabase`
+
+Open
+No matches in any source file. Let me also check config files and HTML for any references.
+
+0123456789
+
+ actions taken
+
+Confirmed: no source code, config, or HTML references Bolt Database — only `node_modules/`, `package.json`, `package-lock.json`, and `.env`. Safe to remove. I'll remove it from `package.json` and reinstall to update the lockfile.
+
+0123456789
+
+ actions taken
+
+Both build and typecheck passed.
+
+**What I changed:**
+
+1. **`package.json`** — Removed the `@supabase/Bolt Database-js` entry from the `dependencies` list. No other dependencies were touched.
+2. **`package-lock.json`** — Updated automatically by running `npm install`, which removed all 13 Bolt Database-related packages from the lockfile and `node_modules`.
+**Verification performed:**
+
+- Searched all source files (`src/`), config files, and HTML — confirmed zero imports or references to Bolt Database anywhere in the application code.
+- Ran `npm run build` — passed (exit 0).
+- Ran `npm run typecheck` — passed (exit 0).
+No UI, sample data, availability logic, or other dependencies were changed. The `.env` file still contains Bolt Database variables but those are unused by the app and I left them untouched since you only asked to remove the dependency.
 ```
 
 Add further blocks for further prompts.
@@ -167,7 +203,7 @@ the AC (or the scope) that justifies it.
 | # | What Bolt changed or suggested | accept / reject | Reason — cite the AC or the scope | Retest: which cases, result |
 | --- | --- | --- | --- | --- |
 | 1 | Removed B-204's extra Study Group booking and skipped overlap reporting when duration exceeds 120 minutes. | accept | AC2: reject durations over 120 minutes; AC4 still checks valid-length intervals. The fixture now matches the specified single-booking setup. | Retested T5: Unavailable, with only the 121-minute reason. Retested T1–T9 after the final local copy was assembled; all nine match. |
-| 2 | Removed unused `@supabase/supabase-js` from the final copy by local hand edit; Bolt did not suggest this change. | accept | Scope: this is a frontend-only prototype with no backend, database or external API. | Retested build, TypeScript, lint, and T1–T9 on the final local copy; all passed. |
+| 2 | Bolt removed the unused `@supabase/supabase-js` dependency and updated its lockfile; no source-code use was found. | accept | Scope: this is a frontend-only prototype with no backend, database or external API. | Bolt reported build and typecheck passed. Its updated export was not downloaded; the already-tested local final copy independently has the same dependency removed and passed build, TypeScript, lint, and T1–T9. |
 
 ---
 
@@ -178,7 +214,7 @@ Two to four concrete changes, each one retested.
 | # | Issue | Decision | Change (file or component) | Result after retest |
 | --- | --- | --- | --- | --- |
 | 1 | Extra B-204 booking and noisy reason on T5 | Fix | `src/lib/sampleData.ts`: removed Study Group; `src/lib/availability.ts`: only check overlaps for valid intervals of at most 120 minutes. | T5 Unavailable for the 121-minute limit only; all T1–T9 pass on the final copy. |
-| 2 | Unused backend dependency outside the prototype scope | Fix (local hand edit after Bolt token limit) | Removed Supabase from `package.json` and pruned it from `package-lock.json`. | Production build, TypeScript, lint, and T1–T9 pass; no Supabase dependency remains. |
+| 2 | Unused backend dependency outside the prototype scope | Fix (Bolt cleanup prompt; local equivalent was already applied by hand) | Bolt reported removing Supabase from `package.json` and updating `package-lock.json`. The updated Bolt export was not downloaded; the local final copy already has the same removal. | Bolt reported build and typecheck passed. The local final copy passed production build, TypeScript, lint, and T1–T9; no Supabase dependency remains there. |
 
 ---
 
@@ -202,7 +238,7 @@ The same IDs as `known_fails` in `submission.yml`. Write `none` if the run is cl
 
 | Check | Why it stays |
 | --- | --- |
-| L6 | Bolt's daily token limit was reached after the functional fix. No second cleanup prompt was sent, so I have not invented one for the report. The local hand edit removing the unused Supabase dependency is disclosed in sections 6–7 and AI_USAGE.md. |
+| L6 | The cleanup prompt and Bolt's answer are now recorded in section 6. The prompt I actually sent did not include the practice deck's required fixed sentences (“Suggest one small cleanup.” and “Do not add features or redesign the whole application.”), so the checker still flags L6. I have not edited the prompt transcript to make it appear compliant. Bolt reported build/typecheck success; its updated export was not downloaded, and the local equivalent cleanup is disclosed in sections 6–7 and AI_USAGE.md. |
 
 ### 9.2 The end of the day
 

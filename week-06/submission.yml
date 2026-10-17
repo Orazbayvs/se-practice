@@ -27,7 +27,7 @@ bolt:
 
 counts:
   issues: 2
-  cleanup_prompts: 1
+  cleanup_prompts: 2
   change_log_rows: 2
   v1_matches: 9
   final_matches: 9
