@@ -1,0 +1,45 @@
+@startuml
+title Course registration — final sequence
+
+actor Student
+boundary CatalogUI
+control CourseCatalog
+control RegistrationService
+entity CourseOffering
+entity Enrollment
+
+Student -> CatalogUI: browseCatalog(semester)
+CatalogUI -> CourseCatalog: listOfferings(semester)
+CourseCatalog -> CourseOffering: getOfferingsFor(semester)
+CourseOffering --> CourseCatalog: offeringDetails(offeringId, semester, courseCode, title, section, availablePlaces)
+CourseCatalog --> CatalogUI: catalog(offerings, semester, availablePlaces)
+CatalogUI --> Student: displayCatalog(offerings)
+note over CatalogUI, CourseOffering: Catalog browsing is read-only; it does not reserve a place.
+
+Student -> CatalogUI: selectOffering(offeringId)
+Student -> CatalogUI: register(offeringId)
+CatalogUI -> RegistrationService: register(studentId, offeringId)
+
+critical atomic registration: final validation, capacity check, creation and count update
+  RegistrationService -> Enrollment: checkDuplicate(studentId, offeringId)
+  Enrollment --> RegistrationService: enrollmentExists
+  alt already enrolled: enrollmentExists == true
+    RegistrationService --> CatalogUI: reject("already enrolled")
+    note over RegistrationService, CourseOffering: Rejection leaves enrolledCount and availablePlaces unchanged.
+  else not already enrolled: enrollmentExists == false
+    RegistrationService -> CourseOffering: checkCurrentCapacity(offeringId)
+    CourseOffering --> RegistrationService: availablePlaces
+    alt course full: availablePlaces == 0
+      RegistrationService --> CatalogUI: reject("course full")
+      note over RegistrationService, CourseOffering: Rejection leaves enrolledCount and availablePlaces unchanged.
+    else not enrolled and places left: availablePlaces > 0
+      create Enrollment
+      RegistrationService -> Enrollment: createEnrollment(studentId, offeringId)
+      Enrollment --> RegistrationService: enrollment
+      RegistrationService -> CourseOffering: incrementEnrolledCount()
+      RegistrationService --> CatalogUI: confirm(enrollment)
+    end
+  end
+end
+CatalogUI --> Student: displayResult()
+@enduml
