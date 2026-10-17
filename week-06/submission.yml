@@ -40,7 +40,7 @@ checker:
   pass: 27
   fail: 0
   error: 0
-  commit: ad71fbb
+  commit: 173b9f5
   known_fails: []
 
 assumptions:
