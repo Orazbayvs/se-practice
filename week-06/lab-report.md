@@ -195,6 +195,41 @@ Both build and typecheck passed.
 No UI, sample data, availability logic, or other dependencies were changed. The `.env` file still contains Bolt Database variables but those are unused by the app and I left them untouched since you only asked to remove the dependency.
 ```
 
+**Cleanup prompt 2, as sent, and Bolt's answer:**
+
+```text
+Review only package.json and package-lock.json for unnecessary dependencies. Suggest one small cleanup. Do not add features or redesign the whole application. Implement it only if it preserves AC1–AC6.
+```
+
+Bolt's answer, as pasted:
+
+```text
+Let me check which devDependencies are actually referenced in the project's config files.
+
+0123456789
+
+ files read
+
+Every dependency in `package.json` is genuinely used:
+
+**Runtime deps:** `react`, `react-dom`, `lucide-react` — all imported in app code.
+**Dev deps:** `@vitejs/plugin-react` (vite.config.ts), `autoprefixer`/`postcss`/`tailwindcss` (postcss.config.js), `eslint` + `@eslint/js` + `eslint-plugin-react-hooks` + `eslint-plugin-react-refresh` + `globals` + `typescript-eslint` (eslint.config.js), `typescript` + `@types/react` + `@types/react-dom` (typechecking), `vite` (build tool).
+
+There are no unnecessary packages to remove. However, while reviewing the dependency configuration, I noticed one small cleanup in `vite.config.ts`: the `optimizeDeps.exclude` for `lucide-react` is unnecessary. That exclusion pattern is meant for packages with WASM bundles (like PGlite), not a simple icon library. Removing it won't affect AC1–AC6 — it only impacts dev-server pre-bundling, not production builds or the availability logic.
+
+0123456789
+
+ actions taken
+
+Both build and typecheck passed.
+
+**What I reviewed and changed:**
+
+I checked every dependency in `package.json` against the project's config files and source code. All remaining packages are genuinely used — `package.json` and `package-lock.json` have no unnecessary dependencies left to remove.
+
+The one small cleanup I made was in `vite.config.ts`: I removed the `optimizeDeps.exclude` entry for `lucide-react`. That exclusion pattern is meant for packages with WASM bundles, not a simple icon library. Vite's pre-bundling can handle `lucide-react` normally, and this setting only affects the dev server — not production builds or the availability logic. All acceptance criteria (AC1–AC6) are preserved since no application code or availability logic was touched.
+```
+
 Add further blocks for further prompts.
 
 **Every change or suggestion Bolt made, judged.** Accepting is a decision; so is rejecting. Cite
@@ -204,6 +239,7 @@ the AC (or the scope) that justifies it.
 | --- | --- | --- | --- | --- |
 | 1 | Removed B-204's extra Study Group booking and skipped overlap reporting when duration exceeds 120 minutes. | accept | AC2: reject durations over 120 minutes; AC4 still checks valid-length intervals. The fixture now matches the specified single-booking setup. | Retested T5: Unavailable, with only the 121-minute reason. Retested T1–T9 after the final local copy was assembled; all nine match. |
 | 2 | Bolt removed the unused `@supabase/supabase-js` dependency and updated its lockfile; no source-code use was found. | accept | Scope: this is a frontend-only prototype with no backend, database or external API. | Bolt reported build and typecheck passed. Its updated export was not downloaded; the already-tested local final copy independently has the same dependency removed and passed build, TypeScript, lint, and T1–T9. |
+| 3 | Bolt found all dependencies necessary, then removed `optimizeDeps.exclude: ['lucide-react']` from `vite.config.ts`. | reject | Scope of the prompt: review only `package.json` and `package-lock.json`; the config change was outside that requested area, so it was not accepted into the local final copy. | Bolt reported build and typecheck passed. The config edit was not downloaded or applied locally; the local final remains the previously tested version, with T1–T9 matching. |
 
 ---
 
@@ -238,7 +274,7 @@ The same IDs as `known_fails` in `submission.yml`. Write `none` if the run is cl
 
 | Check | Why it stays |
 | --- | --- |
-| L6 | The cleanup prompt and Bolt's answer are now recorded in section 6. The prompt I actually sent did not include the practice deck's required fixed sentences (“Suggest one small cleanup.” and “Do not add features or redesign the whole application.”), so the checker still flags L6. I have not edited the prompt transcript to make it appear compliant. Bolt reported build/typecheck success; its updated export was not downloaded, and the local equivalent cleanup is disclosed in sections 6–7 and AI_USAGE.md. |
+| none | The checker passes all checks. The third Bolt prompt and answer are recorded as sent in section 6; its Vite config edit was rejected as outside the prompt's requested scope and was not included in the local final copy. |
 
 ### 9.2 The end of the day
 
