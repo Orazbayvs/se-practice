@@ -39,7 +39,7 @@ checker:                        # from your LAST run of python tests/check_sis.p
   pass: 54
   fail: 1
   error: 0
-  commit: "9840297"
+  commit: "78e225d"
 
 counts:                         # the validator re-measures every one
   tests: 19
