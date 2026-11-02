@@ -104,3 +104,20 @@ test('X2: a reversed existing booking does not overlap this request', () => {
   const input = { start: 660, end: 720, now: 540, blocked: false, bookings };
   expect(canBook(input)).toBe(true);
 });
+
+test('BUG-A AC4: a request touching two bookings is available', () => {
+  const bookings = [
+    { start: 600, end: 660 },
+    { start: 720, end: 780 },
+  ];
+  const input = { start: 660, end: 720, now: 540, blocked: false, bookings };
+  expect(canBook(input)).toBe(true);
+});
+
+test('BUG-B AC5: an available request that touches no booking leaves bookings unchanged', () => {
+  const bookings = [{ start: 600, end: 660 }];
+  const before = JSON.parse(JSON.stringify(bookings));
+  const input = { start: 720, end: 780, now: 540, blocked: false, bookings };
+  expect(canBook(input)).toBe(true);
+  expect(bookings).toEqual(before);
+});
