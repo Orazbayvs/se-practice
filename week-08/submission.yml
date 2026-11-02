@@ -40,11 +40,11 @@ checker:
   # They must add up to the number of checks it runs (31).
   # Report them as they came out.
   # A FAIL you report and explain in lab-report.md costs you nothing. A hidden one costs the criterion.
-  pass: 29
-  fail: 1
+  pass: 30
+  fail: 0
   error: 1
-  commit: "430af4a"
-  known_fails: [E1, L3]
+  commit: "7c8dece"
+  known_fails: [E1]
 
 verdict:
   # Your judgement from lab-report.md section 7, against the actual code - not a guess.
