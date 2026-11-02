@@ -43,7 +43,7 @@ checker:
   pass: 31
   fail: 0
   error: 0
-  commit: "7bae53e"
+  commit: "5705e78"
   known_fails: []
 
 verdict:
