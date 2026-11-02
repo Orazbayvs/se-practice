@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react';
 import { Building2, Clock, CheckCircle2, XCircle, CalendarX, Users } from 'lucide-react';
 import { sampleRooms, sampleBookings } from '@/lib/sampleData';
 import { Room, Booking, CheckResult } from '@/lib/types';
+import { canBook, getBookingReasons } from './booking';
 import {
-  checkAvailability,
   timeToMinutes,
   minutesToTime,
   formatDuration,
@@ -37,7 +37,17 @@ function App() {
     if (start < 0 || end < 0 || cur < 0) {
       setResult({ available: false, reasons: ['Please enter valid times in HH:MM format.'] });
     } else {
-      setResult(checkAvailability(selectedRoom, start, end, cur, bookings));
+      const request = {
+        start,
+        end,
+        now: cur,
+        blocked: selectedRoom.blocked,
+        bookings: roomBookings,
+      };
+      setResult({
+        available: canBook(request),
+        reasons: getBookingReasons(request),
+      });
     }
     setSubmitted(true);
   };

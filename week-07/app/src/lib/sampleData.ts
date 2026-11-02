@@ -9,7 +9,7 @@ export const sampleRooms: Room[] = [
 ];
 
 export const sampleBookings: Booking[] = [
-  { id: 'bk1', roomId: 'a101', title: 'Intro to Algorithms', start: 540, end: 630 },
+  { id: 'bk1', roomId: 'a101', title: 'Intro to Algorithms', start: 600, end: 660 },
   { id: 'bk2', roomId: 'a101', title: 'Faculty Meeting', start: 780, end: 840 },
   { id: 'bk3', roomId: 'b204', title: 'Organic Chem Lab', start: 600, end: 660 },
   { id: 'bk5', roomId: 'd105', title: 'Reading Circle', start: 480, end: 540 },
