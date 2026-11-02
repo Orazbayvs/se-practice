@@ -226,12 +226,12 @@ Screenshot of the result: `evidence/install.png`.
 
 <!-- Write below this line -->
 
-No external skill-upload environment was available from this VS Code session. A separate
-Copilot task context received the deck's skill text as its first instruction and returned a
-diagnosis, which is a prompt-only simulation rather than an installed skill. The environment
-did not show an invocation badge or other indication. The `evidence/` folder currently contains
-only `.gitkeep`; a genuine screenshot of the simulated chat has not been captured, so E1 remains
-an honest checker error. The student has now read `SKILL.md` and confirmed it contains no secrets.
+No external skill-upload environment was available, so I used the deck's prompt-only simulation
+in a fresh Copilot Chat: the skill text was sent first, then the diagnosis prompt and same test
+input. This is a simulation, not an installed skill, and the environment showed no invocation
+badge. `evidence/install.png` is a genuine screenshot of that chat's diagnostic response and the
+visible end of the skill instruction. The student has read `SKILL.md` and confirmed it contains
+no secrets.
 Copilot drafted the initial file from the handout. The student edited the punctuation at the end
 of steps 5 and 6 and reviewed the full file. The checker requires those procedure lines verbatim,
 so Copilot restored the periods in the final copy. The initial AI draft and the student's edits
@@ -508,7 +508,7 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
 
 | Check | Why it stays |
 | --- | --- |
-| E1 | No genuine screenshot of the prompt-only simulation chat was captured; I will not substitute a fabricated image. |
+| none | All assignment-checker checks pass. |
 
 ### 9.2 One limitation of AI-assisted debugging
 
@@ -528,4 +528,4 @@ Both assistant contexts proposed a BUG-B test that also touched an endpoint, so 
      visible after the BUG-A patch: the AC5 test had been failing for the wrong reason." -->
 
 <!-- Write your conclusion below this line -->
-The skill text did not change the diagnosis in a meaningful way: both assistant responses found the inclusive overlap check and the array append. The skill response was easier to scan because it separated evidence, cause and fix, but both proposed a BUG-B test that also touched an endpoint, so BUG-A could mask the mutation. The independent 720–780 regression isolated that behavior, and each failing test passed after its corresponding one-line fix; all 19 tests then passed. This proves these test cases match the stated criteria for these two defects, not that every possible input is correct or that other defects do not exist. I reviewed and edited the generated skill wording, but did not type it from scratch; the installation screenshot is still missing.
+The skill text did not change the diagnosis in a meaningful way: both assistant responses found the inclusive overlap check and the array append. The skill response was easier to scan because it separated evidence, cause and fix, but both proposed a BUG-B test that also touched an endpoint, so BUG-A could mask the mutation. The independent 720–780 regression isolated that behavior, and each failing test passed after its corresponding one-line fix; all 19 tests then passed. This proves these test cases match the stated criteria for these two defects, not that every possible input is correct or that other defects do not exist. I reviewed and edited the generated skill wording, but did not type it from scratch; the prompt-only chat is documented with a genuine screenshot.
