@@ -18,6 +18,8 @@ proposed:** no — the assistant made the local edits; I must review and underst
 
 **Every terminal output in lab-report.md was pasted from a real run, unedited:** no — sections 2.2–2.3 contain selected output excerpts; sections 8.1–8.2 record the actual targeted/full-run results.
 
+**I read `skills/bug-detector/SKILL.md` and confirmed it contains no secrets:** yes — confirmed by the student on 2 November 2026.
+
 **I can explain both bugs and both fixes — which line, why it was wrong, which test proves the
 fix — without the assistant:** pending student confirmation
 

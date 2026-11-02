@@ -206,7 +206,7 @@ One row per defect. At least **BUG-A and BUG-B**. "Suspected cause" is your hypo
 | The file is plain UTF-8 text, named exactly `SKILL.md` (not `SKILL.md.txt`) | yes |
 | The first and the closing YAML delimiter are exactly three hyphens: `---` | yes |
 | `name` is lowercase with hyphens, and `description` says WHEN to use it | yes |
-| I read the whole file once: no passwords, API keys or private student data | no — Copilot created and checked it; I have not independently reviewed it |
+| I read the whole file once: no passwords, API keys or private student data | yes |
 
 **The contents of `skills/bug-detector.zip`.** Paste the listing (Windows: open the ZIP and copy
 the paths; macOS/Linux: `unzip -l skills/bug-detector.zip`):
@@ -229,10 +229,13 @@ Screenshot of the result: `evidence/install.png`.
 No external skill-upload environment was available from this VS Code session. A separate
 Copilot task context received the deck's skill text as its first instruction and returned a
 diagnosis, which is a prompt-only simulation rather than an installed skill. The environment
-did not show an invocation badge or other indication. I could not capture a genuine screenshot
-of that simulated chat in `evidence/install.png`; E1 therefore remains an honest checker error.
+did not show an invocation badge or other indication. The `evidence/` folder currently contains
+only `.gitkeep`; a genuine screenshot of the simulated chat has not been captured, so E1 remains
+an honest checker error. The student has now read `SKILL.md` and confirmed it contains no secrets.
 Copilot, rather than the student, created `SKILL.md` from the exact handout text; this does not
 meet the handout's manual-typing requirement and is disclosed in `AI_USAGE.md`.
+The student independently read the complete file on 2 November 2026 and confirmed it contains
+only the handout procedure, with no passwords, API keys or private student data.
 ---
 
 ## 5. Task 4 — without the skill
@@ -504,7 +507,6 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
 | Check | Why it stays |
 | --- | --- |
 | E1 | No genuine screenshot of the prompt-only simulation chat was captured; I will not substitute a fabricated image. |
-| L3 | The fourth skill checklist answer is no: Copilot authored and reviewed the file, and the report does not claim independent student review. |
 
 ### 9.2 One limitation of AI-assisted debugging
 
