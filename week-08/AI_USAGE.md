@@ -6,10 +6,14 @@ work and complete the remaining personal review and signature before submission.
 
 | Tool | Exact model / plan | Used for | Which files it touched |
 | --- | --- | --- | --- |
-| Copilot in VS Code | Not displayed | Diagnosis without the skill; review of failures; implementation of BUG-A and BUG-B fixes; creating the skill from the deck text; drafting the report, disclosure, and declaration | `app/src/booking.ts`, `app/src/booking.test.ts`, `skills/bug-detector/SKILL.md`, `skills/bug-detector.zip`, `lab-report.md`, `AI_USAGE.md`, `submission.yml` |
+| Copilot in VS Code | Not displayed | Diagnosis without the skill; review of failures; implementation of BUG-A and BUG-B fixes; drafting the initial skill from the deck text; drafting the report, disclosure, and declaration | `app/src/booking.ts`, `app/src/booking.test.ts`, initial `skills/bug-detector/SKILL.md`, `lab-report.md`, `AI_USAGE.md`, `submission.yml` |
 | Copilot task-agent contexts (two isolated runs) | Not displayed | Prompt-only comparison: one diagnosis without the skill text and one with the skill text supplied as an instruction; neither agent edited project files | No files |
 
-**`skills/bug-detector/SKILL.md` was typed by me from the deck's text, not generated:** no — Copilot created the file from the deck text. The handout's manual-typing requirement is not met.
+**`skills/bug-detector/SKILL.md` was typed by me from the deck's text, not generated:** no — Copilot drafted the initial file from the deck text. I reviewed it and edited the punctuation at the end of steps 5 and 6. I did not type the entire file from scratch.
+
+The checker requires those two procedure lines to match the deck exactly, including their
+periods, so Copilot restored the final punctuation after recording the student's edits.
+`skills/bug-detector.zip` was regenerated to match the final `SKILL.md`.
 
 **I applied the patches myself, one minimal change per bug, after reviewing what the assistant
 proposed:** no — the assistant made the local edits; I must review and understand them before submitting.

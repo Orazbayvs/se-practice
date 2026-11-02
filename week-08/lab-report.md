@@ -215,7 +215,7 @@ the paths; macOS/Linux: `unzip -l skills/bug-detector.zip`):
 Archive:  bug-detector.zip
   Length      Date    Time    Name
 ---------  ---------- -----   ----
-      570  11-02-2026 18:41   bug-detector/SKILL.md
+      570  11-02-2026 19:02   bug-detector/SKILL.md
 ---------                     -------
       570                     1 file
 ```
@@ -232,8 +232,10 @@ diagnosis, which is a prompt-only simulation rather than an installed skill. The
 did not show an invocation badge or other indication. The `evidence/` folder currently contains
 only `.gitkeep`; a genuine screenshot of the simulated chat has not been captured, so E1 remains
 an honest checker error. The student has now read `SKILL.md` and confirmed it contains no secrets.
-Copilot, rather than the student, created `SKILL.md` from the exact handout text; this does not
-meet the handout's manual-typing requirement and is disclosed in `AI_USAGE.md`.
+Copilot drafted the initial file from the handout. The student edited the punctuation at the end
+of steps 5 and 6 and reviewed the full file. The checker requires those procedure lines verbatim,
+so Copilot restored the periods in the final copy. The initial AI draft and the student's edits
+are disclosed in `AI_USAGE.md`.
 The student independently read the complete file on 2 November 2026 and confirmed it contains
 only the handout procedure, with no passwords, API keys or private student data.
 ---
@@ -526,4 +528,4 @@ Both assistant contexts proposed a BUG-B test that also touched an endpoint, so 
      visible after the BUG-A patch: the AC5 test had been failing for the wrong reason." -->
 
 <!-- Write your conclusion below this line -->
-The skill text did not change the diagnosis in a meaningful way: both assistant responses found the inclusive overlap check and the array append. The skill response was easier to scan because it separated evidence, cause and fix, but both proposed a BUG-B test that also touched an endpoint, so BUG-A could mask the mutation. The independent 720–780 regression isolated that behavior, and each failing test passed after its corresponding one-line fix; all 19 tests then passed. This proves these test cases match the stated criteria for these two defects, not that every possible input is correct or that other defects do not exist. The installation screenshot is still missing, and the skill file was assistant-authored rather than manually typed by me.
+The skill text did not change the diagnosis in a meaningful way: both assistant responses found the inclusive overlap check and the array append. The skill response was easier to scan because it separated evidence, cause and fix, but both proposed a BUG-B test that also touched an endpoint, so BUG-A could mask the mutation. The independent 720–780 regression isolated that behavior, and each failing test passed after its corresponding one-line fix; all 19 tests then passed. This proves these test cases match the stated criteria for these two defects, not that every possible input is correct or that other defects do not exist. I reviewed and edited the generated skill wording, but did not type it from scratch; the installation screenshot is still missing.
