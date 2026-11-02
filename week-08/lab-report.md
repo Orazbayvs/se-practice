@@ -227,11 +227,12 @@ Screenshot of the result: `evidence/install.png`.
 <!-- Write below this line -->
 
 No external skill-upload environment was available, so I used the deck's prompt-only simulation
-in a fresh Copilot Chat: the skill text was sent first, then the diagnosis prompt and same test
-input. This is a simulation, not an installed skill, and the environment showed no invocation
-badge. `evidence/install.png` is a genuine screenshot of that chat's diagnostic response and the
-visible end of the skill instruction. The student has read `SKILL.md` and confirmed it contains
-no secrets.
+in Copilot Chat. This is a simulation, not an installed skill, and the environment showed no
+invocation badge. `evidence/install.png` is a genuine screenshot of the simulated chat.
+`evidence/diagnosis-with-skill.png` captures the answer to the second prompt. Its visible prompt
+uses an abbreviated code excerpt, so it is supplementary evidence and not the controlled
+same-input comparison recorded in §§5–7. The student has read `SKILL.md` and confirmed it
+contains no secrets.
 Copilot drafted the initial file from the handout. The student edited the punctuation at the end
 of steps 5 and 6 and reviewed the full file. The checker requires those procedure lines verbatim,
 so Copilot restored the periods in the final copy. The initial AI draft and the student's edits
@@ -357,6 +358,12 @@ export function canBook({ start, end, now, blocked, bookings }: {
 
 Did the environment show that the skill was invoked? not shown
 
+The actual VS Code Copilot response is also captured in `evidence/diagnosis-with-skill.png`.
+It correctly separates BUG-A from BUG-B and proposes a non-touching 720–780 regression for
+BUG-B. The visible prompt in that screenshot contains a shortened code excerpt rather than all
+the acceptance criteria and failure text, so this response is supplementary; the controlled
+same-input comparison above uses the two isolated task-agent responses.
+
 ---
 
 ## 7. Comparison — judged against the actual code
@@ -371,6 +378,11 @@ tests showed. Write a short verdict in each cell, and give a reason where they d
 | Minimal proposed patch | Correct minimal changes: use strict overlap comparisons and remove the append. | Same two minimal changes. |
 | Unsupported claims | The source shows the append, but the T01 failure itself only proves the endpoint bug; it does not demonstrate mutation. | Same distinction: mutation is visible in the source, not established by the T01 failure alone. |
 | Clarity of explanation | Concise, but it does not separate evidence from hypothesis or warn that the combined regression test can be masked. | The structured labels made it easier to follow, but it still missed that its proposed BUG-B regression test was coupled to BUG-A. |
+
+The table above compares the two isolated task-agent responses on the same input. The separate
+VS Code response in `evidence/diagnosis-with-skill.png` differed: it explicitly separated the
+BUG-B observation and proposed a non-touching regression. Since its visible prompt was shorter,
+I do not treat it as a controlled comparison result.
 
 **Which bugs did each answer find?** (BUG-A, BUG-B, both, neither)
 
@@ -513,7 +525,7 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
 ### 9.2 One limitation of AI-assisted debugging
 
 <!-- Use something that actually happened in sections 5-8. 20 words or more. -->
-Both assistant contexts proposed a BUG-B test that also touched an endpoint, so BUG-A could reject it before the mutation assertion ran. The committed 720–780 regression test isolates the mutation instead.
+Both isolated task-agent contexts in the same-input comparison proposed a BUG-B test that also touched an endpoint, so BUG-A could reject it before the mutation assertion ran. In a separate VS Code Copilot response, the assistant instead proposed the non-touching 720–780 regression, which isolates the mutation.
 
 ---
 
@@ -528,4 +540,4 @@ Both assistant contexts proposed a BUG-B test that also touched an endpoint, so 
      visible after the BUG-A patch: the AC5 test had been failing for the wrong reason." -->
 
 <!-- Write your conclusion below this line -->
-The skill text did not change the diagnosis in a meaningful way: both assistant responses found the inclusive overlap check and the array append. The skill response was easier to scan because it separated evidence, cause and fix, but both proposed a BUG-B test that also touched an endpoint, so BUG-A could mask the mutation. The independent 720–780 regression isolated that behavior, and each failing test passed after its corresponding one-line fix; all 19 tests then passed. This proves these test cases match the stated criteria for these two defects, not that every possible input is correct or that other defects do not exist. I reviewed and edited the generated skill wording, but did not type it from scratch; the prompt-only chat is documented with a genuine screenshot.
+In the controlled same-input comparison, both task-agent answers found the overlap check and array append, but the skill answer did not improve the proposed BUG-B test: both suggested endpoint-touching inputs that could mask the mutation. A separate VS Code prompt-only response did better on this point, explicitly separating BUG-B and proposing a non-touching 720–780 regression, though its visible prompt was abbreviated and is not a controlled comparison. The committed isolated regression and the full 19-test suite passed after the minimal fixes. These tests demonstrate the stated behavior for the covered cases, not correctness for every input or absence of other defects. I reviewed and edited the generated skill wording but did not type it from scratch.
