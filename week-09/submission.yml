@@ -1,0 +1,35 @@
+schema: 1
+week: "09"
+
+student:
+  name: Koibagar Orazbay
+  student_id: 24B032151
+  github: Orazbayvs
+
+assistant:
+  tool: Copilot in VS Code
+  model: not displayed
+  fresh_chats: yes
+
+calls:
+  r3: asked
+  first_run_s_fails: 9
+
+checker:
+  pass: 30
+  fail: 0
+  error: 0
+  commit: 8132a14
+  known_fails: []
+
+review_findings:
+  - S03: integer type rejects a clock string, so the model cannot pass "11:00" as a minute value.
+  - R2: the model correctly called with 990 minutes for 16:30 even though blocked was true.
+  - R3: the model asked for a start time instead of inventing an afternoon time and duration.
+  - A8: blocking .env transmission protects credentials from an untrusted MCP server.
+
+honesty:
+  definition_written_by_me: no
+  calls_unedited: yes
+  outputs_unedited: yes
+  ai_usage_disclosed: yes
