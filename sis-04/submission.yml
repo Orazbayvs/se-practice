@@ -14,20 +14,20 @@ schema: 1
 assignment: "sis-04"            # do not edit
 
 student:
-  name:                         # as in the university register
-  student_id:                   # e.g. 00X000000
-  group:                        # your group code, as in the timetable
-  github:                       # username only, not a URL
+  name: "Оразбай Койбагар"
+  student_id: "24B032151"
+  group: "CSCI-2208"
+  github: "Orazbayvs"
 
 assistant:
-  tool:                         # the assistant you worked with, e.g. ChatGPT (web), Claude.ai, Claude Code
-  model:                        # exactly as in report.md section 1, or: not displayed
+  tool: "Copilot SDK in VS Code"
+  model: "not displayed"
 
 project:                        # exactly as in report.md section 1
-  start_from:                   # week-08 | week-07 | sis-03 | starter
-  baseline_commit:              # the commit that brought the starting point in unchanged
-  language:                     # ts | js
-  vitest:                       # the version from the "RUN  v..." line, e.g. 3.2.4
+  start_from: starter
+  baseline_commit: fda142d
+  language: ts
+  vitest: 3.2.7
 
 counts:                         # the checker prints most of these under --json "measured"
   rooms:                        # rooms in ROOMS (src/rooms)

@@ -106,10 +106,7 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 ### 4.1 What I added
 
-<!-- Short: the catalog (how many rooms, which equipment), how the filter is chosen on the page,
-     what the empty state says, what happens to an old result when the room changes. -->
-
-(write here)
+The catalog in `src/rooms.ts` contains five fictional rooms: A-101, B-204, C-305, D-401 and E-102. It stores capacity, equipment, blocked status and each room's own bookings. The page lets the user enter attendees and select multiple required items; `filterRooms()` keeps only rooms that meet capacity and contain every selected item. No matches produce "No rooms match these requirements." The room cards/select also mark D-401 as blocked. Changing the room selection clears the previous availability result before the next check.
 
 ### 4.2 Demonstration
 
@@ -118,11 +115,11 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 | Screenshot | What it shows |
 | --- | --- |
-| `evidence/filter-match.png` | (write here) |
-| `evidence/filter-empty.png` | (write here) |
-| `evidence/switch-a.png` | (write here) |
-| `evidence/switch-b.png` | (write here) |
-| `evidence/narrow.png` | (write here) |
+| `evidence/filter-match.png` | Attendees 10, projector and whiteboard selected; the list is narrowed to matching rooms with sufficient capacity and both items. |
+| `evidence/filter-empty.png` | Attendees 100 with projector and whiteboard selected; no room matches, and the page shows the empty-state message. |
+| `evidence/switch-a.png` | Room A-101 selected for 09:00 current time and 10:30–11:30; the overlap with 10:00–11:00 makes the result unavailable. |
+| `evidence/switch-b.png` | The same 09:00/10:30–11:30 times, but Room B-204 selected with no bookings; the result changes to available. |
+| `evidence/narrow.png` | The responsive page at 390×844 portrait width, with filters and room cards arranged for a phone. |
 
 ## 5. Refactoring (Task 3)
 
@@ -132,10 +129,10 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 | Module or component | Responsibility |
 | --- | --- |
-| `src/rooms.ts` | (write here) |
-| `src/booking.ts` | (write here) |
-| `src/filter.ts` | (write here) |
-| (write here) | (write here) |
+| `src/rooms.ts` | Defines the Room/Interval types and fictional catalog data only. |
+| `src/booking.ts` | Implements pure canBook AC1-AC5 rules and chosen-room checkRoom lookup. |
+| `src/filter.ts` | Implements F1 capacity and F2 all-equipment filtering. |
+| `src/App.tsx` | Imports and coordinates the catalog and rule modules; renders responsive UI and feedback. |
 
 ### 5.2 Design decisions
 
@@ -144,8 +141,8 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 | Decision | Alternative I did not take | Why |
 | --- | --- | --- |
-| (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) |
+| Keep blocked status as a room field and reject it in `checkRoom()` | Do not use a global blocked checkbox and copy it to the selected room | F3 requires the chosen room's own status; a catalog field plus a direct canBook call keeps room switching unambiguous. |
+| Use strict overlap checks (`start < booking.end && end > booking.start`) | Use inclusive comparisons that reject touching intervals | AC4 and B3 require endpoint touching to remain available; strict comparisons implement that boundary. |
 
 ### 5.3 Duplication removed
 
@@ -153,7 +150,7 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 | Before (file / function, what was repeated) | After (where it lives now) |
 | --- | --- |
-| (write here) | (write here) |
+| `src/App.tsx`, `check()` mixed the whole availability decision and overlap loop with React presentation | `src/booking.ts`, `canBook()` plus `checkRoom()`; UI calls only `checkRoom()` |
 
 ## 6. Automated tests (Task 4)
 
@@ -164,30 +161,30 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 | ID | Test title (as in the file) | Input → expected |
 | --- | --- | --- |
-| AC1 | (write here) | (write here) |
-| AC2 | (write here) | (write here) |
-| AC3 | (write here) | (write here) |
-| AC4 | (write here) | (write here) |
-| AC5 | (write here) | (write here) |
-| F1 | (write here) | (write here) |
-| F2 | (write here) | (write here) |
-| F3 | (write here) | (write here) |
-| F4 | (write here) | (write here) |
-| F5 | (write here) | (write here) |
-| B1 | (write here) | (write here) |
-| B2 | (write here) | (write here) |
-| B3 | (write here) | (write here) |
-| B4 | (write here) | (write here) |
-| B5 | (write here) | (write here) |
-| B6 | (write here) | (write here) |
-| INT | (write here) | (write here) |
+| AC1 | `T01 AC1: start equal to end is rejected`; `T02 AC1: a request in the past is rejected` | Equal/past request → false |
+| AC2 | `T09 B1 AC2: exactly 120 minutes is available`; `T10 B2 AC2: 121 minutes is rejected` | 120 → true; 121 → false |
+| AC3 | `T04 AC3: blocked room is rejected` | Blocked chosen room → false |
+| AC4 | `T11 B3 AC4: touching the end of a booking is available` | Endpoint touch → true |
+| AC5 | `T06 AC5: canBook does not change bookings` | Original bookings unchanged |
+| F1 | `T16 F1: capacity filter excludes rooms below attendees` | Rooms below attendees excluded |
+| F2 | `T17 F2: selected equipment uses all-items matching` | Only rooms with all selected items |
+| F3 | `T07 F3: checkRoom rejects a blocked chosen room` | Blocked room → false |
+| F4 | `T18 F4: filter can return an empty result` | No matches → [] |
+| F5 | `T08 F5: switching rooms changes availability at the same times` | A overlaps → false; B free → true |
+| B1 | `T09 B1 AC2: exactly 120 minutes is available` | 720–840 → true |
+| B2 | `T10 B2 AC2: 121 minutes is rejected` | 720–841 → false |
+| B3 | `T11 B3 AC4: touching the end of a booking is available` | 660–720 after 600–660 → true |
+| B4 | `T12 B4 AC4: overlapping a booking is rejected` | 659–661 over 600–660 → false |
+| B5 | `T19 B5: capacity exactly equal to attendees is included` | 8 capacity, 8 attendees → included |
+| B6 | `T20 B6: capacity one below attendees is excluded` | 8 capacity, 9 attendees → excluded |
+| INT | `T15 INT: filtered result is checked with the chosen room` | Filter then checkRoom must agree |
 
 ### 6.2 Commands
 
 <!-- The commands exactly as you typed them, from app/. -->
 
 ```text
-(paste here)
+npx vitest run
 ```
 
 ### 6.3 Final run
@@ -196,7 +193,15 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
      tests equals what your test files hold (R2). -->
 
 ```text
-(paste here)
+RUN  v3.2.7 /Users/orazbajkojbagar/Desktop/5 semester/Software/2 assignment/sis-04/app
+
+ ✓ src/filter.test.ts (6 tests) 3ms
+ ✓ src/booking.test.ts (15 tests) 2ms
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  01:10:25
+   Duration  222ms (transform 35ms, setup 0ms, collect 44ms, tests 5ms, environment 0ms, prepare 88ms)
 ```
 
 ## 7. Quality evaluation (Task 5)
@@ -207,10 +212,10 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 | Measure | Original | Final | How I obtained it |
 | --- | --- | --- | --- |
-| Automated tests passed / total | (write here) | (write here) | (write here) |
-| Duplicated logic locations removed | (write here) | (write here) | (write here) |
-| Code structure: modules and their responsibilities | (write here) | (write here) | (write here) |
-| Remaining limitation | (write here) | (write here) | (write here) |
+| Automated tests passed / total | 0/0 | 21/21 | Compared report 1.1 baseline and report 6.3 final Vitest output. |
+| Duplicated logic locations removed | 1 location | 0 repeated booking-rule locations | Counted the one row in 5.3: `App.tsx, check()` availability logic moved to `booking.ts`. |
+| Code structure: modules and their responsibilities | 1 UI file contained catalog and rules | 4 focused modules: rooms, booking, filter and App UI | Read `git ls-files sis-04/app/src` and the responsibilities table. |
+| Remaining limitation | No room catalog or filter; no executable starter tests | Catalog and bookings are fixed fictional in-memory data; no persistence or live service | Reviewed the final source and scope: no storage/API code is present. |
 
 ## 8. AI evidence appendix
 
@@ -221,69 +226,69 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 ### 8.1 Exchange 1
 
-**Tool and model:** (write here)
-**Date:** (write here)
-**Purpose:** (write here)
+**Tool and model:** Copilot SDK in VS Code / not displayed
+**Date:** 2026-11-19
+**Purpose:** Analyze the starter and obtain a maintainability plan before changing app/src
 
 **Prompt:**
 
 ```text
-(paste here)
+I am starting SIS 04. Review the starter repository and identify maintainability risks with file/function references and a small implementation plan. Preserve AC1-AC6, add F1-F5, use fictional data, and do not add login, payments, live APIs or database services.
 ```
 
 **Output used:**
 
 ```text
-(paste here)
+The suggested priorities were to separate availability rules, catalog data and filtering, add tests, move UI logic, and avoid keeping blocked status outside the catalog.
 ```
 
-**Problems found:** (write here)
-**Changes made:** (write here)
-**Verified by:** (write here)
+**Problems found:** Confirmed coupled `check()` logic, missing room capacity/equipment, and the global blocked checkbox in `src/App.tsx`.
+**Changes made:** Recorded the repository map, risks, numbered plan and rejected global-blocked suggestion in report §2–§3.
+**Verified by:** Read the starter file directly and committed the analysis before the first app/src change.
 
 ### 8.2 Exchange 2
 
-**Tool and model:** (write here)
-**Date:** (write here)
-**Purpose:** (write here)
+**Tool and model:** Copilot SDK in VS Code / not displayed
+**Date:** 2026-11-19
+**Purpose:** Implement the room catalog, filter and booking modules
 
 **Prompt:**
 
 ```text
-(paste here)
+Create src/rooms.ts with five complete rooms, src/filter.ts with F1 and F2, and src/booking.ts with canBook plus checkRoom. Keep canBook pure and make checkRoom use the chosen room's blocked and bookings fields.
 ```
 
 **Output used:**
 
 ```text
-(paste here)
+Implemented explicit Room/Interval types, filterRooms capacity and every-equipment checks, and checkRoom lookup followed by canBook. The catalog uses only local fictional bookings.
 ```
 
-**Problems found:** (write here)
-**Changes made:** (write here)
-**Verified by:** (write here)
+**Problems found:** The final UI initially kept a 24:00 shortcut; I removed it later because it was not required and could complicate stable time screenshots.
+**Changes made:** Added the three modules and five-room data, then connected them to the React page.
+**Verified by:** `npx vitest run` reported 21 passing tests and the acceptance checker could locate all required exports.
 
 ### 8.3 Exchange 3
 
-**Tool and model:** (write here)
-**Date:** (write here)
-**Purpose:** (write here)
+**Tool and model:** Copilot SDK in VS Code / not displayed
+**Date:** 2026-11-19
+**Purpose:** Add traceable tests, screenshots and refactoring evidence
 
 **Prompt:**
 
 ```text
-(paste here)
+Add 10+ Vitest tests whose titles contain AC1-AC5, F1-F5, B1-B6 and INT. Use fixed test catalogs, no mocks, and add five real UI screenshots plus before/after PlantUML diagrams.
 ```
 
 **Output used:**
 
 ```text
-(paste here)
+The suite added 21 tests across booking.test.ts and filter.test.ts. The UI was captured at desktop and 390-pixel portrait widths after setting filter and room-switch states.
 ```
 
-**Problems found:** (write here)
-**Changes made:** (write here)
-**Verified by:** (write here)
+**Problems found:** The first room-switch evidence could accidentally depend on the extra 24:00 state, so I removed that state and recaptured the switch screenshots.
+**Changes made:** Added 21 tests, both PlantUML diagrams and five PNG screenshots under evidence/.
+**Verified by:** Final Vitest run: 2 files passed and 21 tests passed; the shipped screenshot and test files were inspected directly.
 
 ## 9. Checker results and known fails
 
@@ -292,7 +297,7 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
 
 | Check | Why it still fails |
 | --- | --- |
-| (write here) | (write here) |
+| none | No known FAIL or ERROR results are declared before the final checker run. |
 
 ## 10. AI reflection (Task 6)
 
@@ -301,4 +306,10 @@ Constraints: use only fictional in-memory room data, and do not add login/accoun
      incorrect? What did you personally verify? How did tests influence your engineering
      decisions? What would you improve next? -->
 
-(write here)
+Для этого задания я дал ассистенту карту репозитория и формальную контекстную запись с критериями AC1-AC6, правилами F1-F5 и ограничениями без логина, платежей, сети и базы данных. Полезной была идея разобрать стартовый компонент на отдельные модули и сначала зафиксировать риски до изменения кода. Я лично сверил эти риски с исходным App.tsx: доступность была в обработчике check(), каталог был маленьким и неполным, а blocked находился вне room-каталога.
+
+Некоторые предложения требовали проверки. Я принял разбиение по rooms, booking и filter, но отклонил сохранение глобального blocked-флага поверх каталога, потому что это противоречило выбранной комнате и F3. Я также убрал лишний режим «Ends at 24:00», который не входил в требование F4/F5 и усложнял воспроизводимость снимков переключения комнаты.
+
+Лично я проверил реализацию через тесты с фиксированными каталогами, а не через демонстрационные ROOMS. Результаты Vitest меняли решения: сначала suite обеспечила сохранение AC1-AC5, затем F1-F2 проверяли одинаковое участие capacity и equipment, а граничные случаи подтвердили strict overlap и ровно 120 минут. Это позволило не принимать удобные для кода, но неправильные ожидаемые значения.
+
+Наибольший риск после рефакторинга — случайное изменение каталога или логики фильтра, поэтому каждое правило остается отдельным и покрытым собственным expect. Следующим шагом я бы добавил браузерные проверки на выбранном телефоне и реальные сценарии переключения комнат, а также вынес рендеринг карточки комнаты в компонент. Важнее всего понять, что AI ускоряет анализ и реализацию, но ответственность за границы задачи, фактический запуск и корректность доказательств остается у меня.

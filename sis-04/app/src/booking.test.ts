@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { canBook, checkRoom } from './booking';
+import { filterRooms } from './filter';
 import type { Room } from './rooms';
 
 const fixedRooms: Room[] = [
@@ -69,7 +70,7 @@ describe('booking rules', () => {
   });
 
   test('T15 INT: filtered result is checked with the chosen room', () => {
-    const matches = fixedRooms.filter(room => room.capacity >= 20);
+    const matches = filterRooms(fixedRooms, { attendees: 20, equipment: [] });
     expect(matches.map(room => room.id)).toEqual(['test-b']);
     expect(checkRoom(matches, 'test-b', { start: 660, end: 720, now: 600 })).toBe(true);
   });
