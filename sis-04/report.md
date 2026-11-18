@@ -15,12 +15,13 @@
 | Item | Value |
 | --- | --- |
 | Assistant (tool) | (write here) |
-| Assistant model | (write here) |
-| Starting point | (write here) |
-| Baseline commit | (write here) |
-| Language (ts or js) | (write here) |
-| Vitest version | (write here) |
-| Where I ran the tests | (write here) |
+| Assistant (tool) | Copilot SDK in VS Code |
+| Assistant model | not displayed |
+| Starting point | starter |
+| Baseline commit | fda142d |
+| Language (ts or js) | ts |
+| Vitest version | 3.2.7 |
+| Where I ran the tests | SIS 04 assignment, macOS terminal |
 
 ### 1.1 Baseline run
 
@@ -29,7 +30,12 @@
      "No test files found". That is your honest "original" number, 0/0. -->
 
 ```text
-(paste here)
+ RUN  v3.2.7 /Users/orazbajkojbagar/Desktop/5 semester/Software/2 assignment/sis-04/app
+
+ No test files found, exiting with code 1
+
+ include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+ exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.git/**, **/.cache/**, **/coverage/**
 ```
 
 ## 2. Context for the assistant
@@ -40,7 +46,15 @@
      they do. A tree is fine:  src/App.tsx — the page, holds the rooms and the form … -->
 
 ```text
-(paste here)
+sis-04/
+  starter/ — unchanged source supplied for the SIS 04 starting point
+  app/ — target project; package.json, Vite entry files and src/ are the runnable app
+  app/src/App.tsx — React page and, in the starter, the only availability rules
+  app/src/main.tsx — mounts the React application
+  app/src/index.css — page and responsive presentation
+  app/package.json — scripts and dependencies
+  sis-04/tests/check_sis.py — local acceptance checker
+  sis-04/report.md — this evidence report
 ```
 
 ### 2.2 The context message as sent
@@ -49,7 +63,11 @@
      (no login, payments, live APIs or database; fictional data only). Unedited. -->
 
 ```text
-(paste here)
+I am starting a new analysis for SIS 04. Use this repository map: sis-04/app/src/App.tsx contains the React UI and all availability logic in check(); sis-04/app/src/main.tsx mounts the page; sis-04/app/src/index.css provides presentation; sis-04/app/package.json defines the Vite and Vitest setup; sis-04/tests/check_sis.py defines the acceptance checks.
+
+The application must preserve AC1-AC6: reject start >= end and past requests, enforce 120 minutes, reject blocked rooms, reject overlaps while allowing endpoint touching, return Available/Unavailable without changing booking data, and provide clear responsive feedback. It must add F1-F5: filter capacity at or above attendees, require ALL selected equipment, never report blocked rooms available, show a clear empty state, and refresh availability when the room changes.
+
+Constraints: use only fictional in-memory room data, and do not add login/account features, payments, live APIs, backend/database services or browser storage. Review the starting code, name maintainability risks with file/function and evidence, and propose a numbered plan of small safe steps. Do not rewrite the app or generate code yet. Keep AC1-AC5 testable and identify one implementation suggestion that should be rejected or modified.
 ```
 
 ## 3. Codebase analysis (Task 1)
@@ -62,24 +80,27 @@
 
 | # | Risk | Where (file / function) | Evidence | Priority |
 | --- | --- | --- | --- | --- |
-| 1 | (write here) | (write here) | (write here) | High / Medium / Low |
-| 2 | (write here) | (write here) | (write here) | High / Medium / Low |
-| 3 | (write here) | (write here) | (write here) | High / Medium / Low |
+| 1 | Availability rules are coupled to presentation | `src/App.tsx`, `check()` | The start/end validation, 120-minute limit, blocked check and overlap loop all execute inside the React event handler. | High |
+| 2 | Catalog is too small and lacks required fields | `src/App.tsx`, `ROOMS` | The two rooms have only id, name, blocked and bookings; capacity and equipment are absent, so F1 and F2 cannot be implemented reliably. | High |
+| 3 | Blocked status is selected separately from the room catalog | `src/App.tsx`, `blocked` state and `check()` | The `Room blocked` checkbox is a global override rather than `room.blocked`, so F3 and room switching can disagree with catalog data. | High |
+| 4 | Room lookup and display formatting are mixed in the component | `src/App.tsx`, `room` and `fmt()` | `ROOMS.find(r => r.id === roomId)!` and minute formatting are embedded in UI code instead of isolated room/booking responsibilities. | Medium |
 
 ### 3.2 Improvement plan — before editing
 
 <!-- Numbered, in the order you will do it, smallest safe step first. Written BEFORE you change
      code: the commit that adds this section comes before the commit that changes app/src. -->
 
-1. (write here)
-2. (write here)
-3. (write here)
+1. Add pure `src/rooms.ts`, `src/filter.ts` and `src/booking.ts` modules, preserving the starter's AC rules.
+2. Add Vitest regression tests for AC1-AC5 and boundary cases before changing the UI behavior.
+3. Add a fictional catalog of at least four rooms and tests for F1, F2, F3, F4 and F5.
+4. Refactor `App.tsx` to import the catalog and rules, with no duplicated booking or filter logic.
+5. Add the four UI/refactoring diagrams and evidence, run the full suite and record measured results.
 
 ### 3.3 One AI suggestion I rejected or modified
 
 | Suggestion (as the assistant made it) | Decision | Why — with the AC, F-rule, test or file behind it |
 | --- | --- | --- |
-| (write here) | Rejected / Modified | (write here) |
+| Keep the existing global `blocked` checkbox and also copy it into each room | Rejected | It would override catalog truth and could make F3 depend on UI state. The catalog's `blocked` field and `checkRoom()` must decide availability directly. |
 
 ## 4. Feature extension (Task 2)
 
