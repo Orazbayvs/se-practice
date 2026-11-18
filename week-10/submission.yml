@@ -1,0 +1,69 @@
+# week-10/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "10"
+
+student:
+  name: Orazbay Koybagar
+  student_id: 24B032151
+  github: Orazbayvs
+
+assistant:
+  tool: GitHub Copilot
+  model: not displayed
+  environment: copilot
+
+project:
+  starting_point: week-08
+  baseline_commit: 03ed5b7
+  language: ts
+  vitest: 2.1.9
+
+counts:
+  claims_challenged: 7
+  risks_registered: 5
+  risks_confirmed: 5
+  tests_final: 21
+  agents_lines_changed: 8
+
+audit:
+  level: 1
+
+decision:
+  top_two: [R1, R2]
+  mitigated: [R1, R2]
+  release: conditional
+
+checker:
+  # Numbers from YOUR last run of: python tests/check_audit.py
+  # They must add up to the number of checks it runs (31).
+  # Report them as they came out.
+  # A FAIL you report and explain in lab-report.md costs you nothing extra. A hidden one costs the criterion.
+  pass: 31
+  fail: 0
+  error: 0
+  commit: 4d57f82
+  known_fails: []
+
+review_findings:
+  # Three or more. One line each, and each one names what it is about: a risk ID (R1...), a
+  # constraint (C1-C6), an AC, a readiness row (1a-3d), or a file.
+  - "R1: invalid minute input like 12:60 was parsed to 780 by src/booking.ts; now rejected by src/lib/availability.ts."
+  - "R2: original AGENTS.md instructed production netlify deploy and real KBTU portal data, violating constraints C1 and C5."
+  - "R3: full npm audit identified 24 vulnerabilities in dev dependencies, while npm audit --omit=dev reported 0."
+  - "Readiness 3a: no automated CI workflow exists under .github/workflows to run Vitest or build checks on push."
+
+honesty:
+  review_was_read_only: yes
+  agents_patch_approved_by_me: yes
+  outputs_unedited: yes
+  ai_usage_disclosed: yes
