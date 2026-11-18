@@ -51,7 +51,7 @@ checker:
   pass: 31
   fail: 0
   error: 0
-  commit: ff7e574
+  commit: 4d57f82
   known_fails: []
 
 review_findings:
