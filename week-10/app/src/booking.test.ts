@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { canBook } from './booking';
+import { canBook, getBookingReasons } from './booking';
 import { timeToMinutes } from './lib/availability';
 
 test('T01 AC4: a request touching after a booking is available', () => {
@@ -134,4 +134,16 @@ test('R1 AC1: invalid minute input cannot become an available booking', () => {
   expect(input.start).toBe(-1);
   expect(canBook(input)).toBe(false);
   expect(timeToMinutes('24:00')).toBe(1440);
+});
+
+test('R2 AC1: a non-finite time has a booking validation reason', () => {
+  const input = {
+    start: 660,
+    end: 720,
+    now: Number.NaN,
+    blocked: false,
+    bookings: [],
+  };
+  expect(canBook(input)).toBe(false);
+  expect(getBookingReasons(input)).toContain('Time values must be finite.');
 });

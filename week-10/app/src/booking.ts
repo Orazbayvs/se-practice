@@ -23,6 +23,9 @@ function getUnavailabilityReasons({
 }: BookingRequest): string[] {
   const reasons: string[] = [];
 
+  if (![start, end, now].every(Number.isFinite)) {
+    reasons.push('Time values must be finite.');
+  }
   if (start < 0 || end > 1440) {
     reasons.push('Times must be within 00:00–24:00.');
   }
@@ -33,7 +36,8 @@ function getUnavailabilityReasons({
     reasons.push('Start time must be after the current time.');
   }
 
-  const validInterval = start >= 0 && end <= 1440 && start < end;
+  const validInterval =
+    Number.isFinite(start) && Number.isFinite(end) && start >= 0 && end <= 1440 && start < end;
 
   if (validInterval && end - start > 120) {
     reasons.push(`Booking duration is ${end - start} min — maximum allowed is 120 min.`);
@@ -56,21 +60,8 @@ function getUnavailabilityReasons({
   return reasons;
 }
 
-export function canBook({ start, end, now, blocked, bookings }: {
-  start: number;
-  end: number;
-  now: number;
-  blocked: boolean;
-  bookings: { start: number; end: number }[];
-}): boolean {
-  if (!(0 <= start && start < end && end <= 1440)) return false;
-  if (!(start > now)) return false;
-  if (end - start > 120) return false;
-  if (blocked) return false;
-  for (const b of bookings) {
-    if (start < b.end && end > b.start) return false;
-  }
-  return true;
+export function canBook(request: BookingRequest): boolean {
+  return getUnavailabilityReasons(request).length === 0;
 }
 
 export function getBookingReasons(request: BookingRequest): string[] {
