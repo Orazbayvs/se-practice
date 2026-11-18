@@ -1,0 +1,65 @@
+{
+  "name": "check_room",
+  "description": "Check whether a room is available for a requested time interval. All times are whole minutes since midnight in the range 0–1440, with 1440 meaning 24:00. Provide the current time, blocked status, and existing bookings using the same units. The tool only checks availability; it does not save, create, or change a booking.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "start": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1440,
+        "description": "Requested start time in whole minutes since midnight."
+      },
+      "end": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1440,
+        "description": "Requested end time in whole minutes since midnight."
+      },
+      "now": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1440,
+        "description": "Current time in whole minutes since midnight."
+      },
+      "blocked": {
+        "type": "boolean",
+        "description": "Whether the room is blocked."
+      },
+      "bookings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1440,
+              "description": "Existing booking start in whole minutes since midnight."
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1440,
+              "description": "Existing booking end in whole minutes since midnight."
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        "description": "Existing bookings as objects with start and end times in whole minutes since midnight; an empty list means no bookings."
+      }
+    },
+    "required": [
+      "start",
+      "end",
+      "now",
+      "blocked",
+      "bookings"
+    ],
+    "additionalProperties": false
+  }
+}
