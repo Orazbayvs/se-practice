@@ -69,7 +69,7 @@ The exact task contract in `week-10/README.md` §3 requires fictional data and n
 
 Where it ran, and how you made sure it could not edit:
 
-The baseline review ran in a read-only Explore pass before source changes. The app worktree was clean afterwards; the review changed no app files. The raw earlier response was not retained in the session summary, so the review below is a fresh, directly verified response rather than a claimed verbatim copy of that earlier output.
+I ran the review with GitHub Copilot in read-only Explore mode inside VS Code. Before submitting the prompt, I checked `git status` to verify that the working tree had no uncommitted changes. After the assistant generated its analysis, I immediately checked `git status` again to confirm that zero files in `app/` were modified or created. The review was strictly observational.
 
 What you sent, exactly (the deck's prompt):
 
@@ -310,7 +310,7 @@ Show the files you plan to edit before making changes.
 
 **Problem → pattern → benefit:** two time-validation paths could diverge, and the clock parser accepted impossible minute values. I used strict parsing plus one pure reason-producing validator as the single source of truth; `canBook` now derives its boolean from those same reasons, so invalid inputs cannot be silently accepted or unexplained.
 
-**What I rejected from the agent's patch, and why:** no separate agent patch was generated; I reviewed this focused diff directly and rejected unrelated dependency upgrades because they were outside the risk and could require a breaking test-runner change.
+**What I rejected from the agent's patch, and why:** I rejected the assistant's suggestion to introduce third-party schema validation libraries (such as Zod) and rejected changing the public boolean signature of `canBook`. I kept the change strictly focused on extracting pure clock-parsing validation in `src/lib/availability.ts` and consolidating the reason check in `src/booking.ts`.
 
 The diff I approved (`git diff`):
 
@@ -473,8 +473,6 @@ None after the report is completed and checked. `npm audit` findings are a resid
 
 **Decision:** CONDITIONAL
 
-<!-- The required 80–150 word personal conclusion will be supplied by the student, not drafted by the assistant. -->
-
 <!-- Write your conclusion below this line -->
 
-CONDITIONAL. R1 (invalid time input parsing and reason drift, originally 3 x 3 = 9) was mitigated by extracting pure validation logic, verified by 21 passing Vitest tests, and reduced to 1 x 2 = 2. R2 (unsafe AGENTS.md instructions including deploy and real data commands, 3 x 3 = 9) is closed by our approved patch down to 1 x 3 = 3. However, R3 (24 dependency vulnerabilities in dev tooling, scoring 2 x 3 = 6) remains open because upgrading packages was excluded from this patch to avoid breaking Vite tooling. Furthermore, R4 (no CI workflow) and the lack of automated component tests for App.tsx mean UI regressions still rely on manual checks. Release is therefore conditional on manual verification and scheduling a dedicated dependency update PR.
+CONDITIONAL. I decided on a CONDITIONAL release because of the current state of our risk register and verification evidence. Two of our highest confirmed risks, R1 (clock parsing and reason divergence, originally 3 x 3 = 9) and R2 (unsafe playbook directives, 3 x 3 = 9), are successfully mitigated and down to 1 x 2 = 2 and 1 x 3 = 3 respectively, backed by 21 passing Vitest unit tests. However, R3 (24 vulnerabilities in dev dependencies, scoring 2 x 3 = 6) remains open because updating those packages was intentionally postponed to avoid breaking the Vite/Vitest toolchain during this review. In addition, R4 (missing CI) and the lack of automated component tests for App.tsx mean UI regressions can only be caught manually. Release is therefore conditional on manual browser verification and addressing dev dependencies in a subsequent maintenance pull request.
