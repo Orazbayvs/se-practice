@@ -18,7 +18,6 @@ export default function App() {
   const [now, setNow] = useState('09:00');
   const [start, setStart] = useState('11:00');
   const [end, setEnd] = useState('12:00');
-  const [endOfDay, setEndOfDay] = useState(false);
   const [result, setResult] = useState<boolean | null>(null);
   const [error, setError] = useState('');
 
@@ -27,12 +26,12 @@ export default function App() {
 
   function check() {
     setResult(null);
-    if (!start || !now || (!end && !endOfDay)) {
+    if (!start || !now || !end) {
       setError('Fill in the current time, the start and the end.');
       return;
     }
     const s = toMinutes(start);
-    const e = endOfDay ? 1440 : toMinutes(end);
+    const e = toMinutes(end);
     const n = toMinutes(now);
     if (!(s < e)) {
       setError('The end time must be after the start time.');
@@ -121,8 +120,7 @@ export default function App() {
         </label>
         <label>Current time<input type="time" value={now} onChange={e => setNow(e.target.value)} /></label>
         <label>Start<input type="time" value={start} onChange={e => setStart(e.target.value)} /></label>
-        <label>End<input type="time" value={end} disabled={endOfDay} onChange={e => setEndOfDay(e.target.value)} /></label>
-        <label className="inline"><input type="checkbox" checked={endOfDay} onChange={e => setEndOfDay(e.target.checked)} /> Ends at 24:00</label>
+        <label>End<input type="time" value={end} onChange={e => setEnd(e.target.value)} /></label>
       </div>
       <button onClick={check}>Check availability</button>
       {error && <p className="error">{error}</p>}

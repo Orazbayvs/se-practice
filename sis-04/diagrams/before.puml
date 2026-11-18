@@ -10,3 +10,15 @@
 '
 @startuml
 @enduml
+@startuml
+title SIS 04 - Before refactoring
+
+component "App.tsx" as App
+component "ROOMS catalog" as Rooms
+component "check()" as Rules
+component "index.css" as CSS
+
+App --> Rooms : holds room data
+App --> Rules : contains validation and overlaps
+App --> CSS : applies presentation
+@enduml

@@ -3,3 +3,17 @@
 '
 @startuml
 @enduml
+@startuml
+title SIS 04 - After refactoring
+
+component "App / UI" as UI
+component "rooms" as Rooms
+component "filter" as Filter
+component "booking" as Booking
+
+UI --> Rooms : imports ROOMS
+UI --> Filter : imports filterRooms
+UI --> Booking : imports checkRoom
+Filter --> Rooms : reads Room type
+Booking --> Rooms : reads Room and Interval types
+@enduml
