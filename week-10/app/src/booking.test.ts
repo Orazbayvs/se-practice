@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { canBook } from './booking';
+import { canBook, getBookingReasons } from './booking';
 
 test('T01 AC4: a request touching after a booking is available', () => {
   const bookings = [{ start: 600, end: 660 }];
@@ -120,4 +120,10 @@ test('BUG-B AC5: an available request that touches no booking leaves bookings un
   const input = { start: 720, end: 780, now: 540, blocked: false, bookings };
   expect(canBook(input)).toBe(true);
   expect(bookings).toEqual(before);
+});
+
+test('R1 AC1: a non-finite current time has a validation reason', () => {
+  const input = { start: 660, end: 720, now: Number.NaN, blocked: false, bookings: [] };
+  expect(canBook(input)).toBe(false);
+  expect(getBookingReasons(input)).toContain('Time values must be finite.');
 });
