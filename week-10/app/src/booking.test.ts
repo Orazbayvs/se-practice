@@ -133,4 +133,5 @@ test('R1 AC1: invalid minute input cannot become an available booking', () => {
   };
   expect(input.start).toBe(-1);
   expect(canBook(input)).toBe(false);
+  expect(timeToMinutes('24:00')).toBe(1440);
 });

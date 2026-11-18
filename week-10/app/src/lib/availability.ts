@@ -1,8 +1,11 @@
 export function timeToMinutes(time: string): number {
-  if (!time) return -1;
-  const [h, m] = time.split(':').map(Number);
-  if (isNaN(h) || isNaN(m)) return -1;
-  return h * 60 + m;
+  const match = /^(\d{2}):(\d{2})$/.exec(time);
+  if (!match) return -1;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (minutes > 59 || hours > 24 || (hours === 24 && minutes !== 0)) return -1;
+  return hours * 60 + minutes;
 }
 
 export function minutesToTime(min: number): string {
