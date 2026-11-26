@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Building2, Clock, CheckCircle2, XCircle, CalendarX, Users, Sparkles } from 'lucide-react';
 import { sampleRooms, sampleBookings } from '@/lib/sampleData';
 import { Room, Booking, CheckResult } from '@/lib/types';
@@ -43,6 +43,8 @@ function App() {
   const [explanation, setExplanation] = useState<ExplanationResult | null>(null);
   const [explaining, setExplaining] = useState(false);
   const [simulateFailure, setSimulateFailure] = useState(false);
+  // V1: every check/reset/explain gets a new id; an explanation that arrives for an older id is dropped.
+  const explainRequestId = useRef(0);
 
   const selectedRoom = useMemo(
     () => rooms.find((r) => r.id === roomId) ?? rooms[0],
@@ -80,13 +82,16 @@ function App() {
         reasons: getBookingReasons(request),
       });
     }
+    explainRequestId.current += 1;
     setExplanation(null);
+    setExplaining(false);
     setSubmitted(true);
   };
 
   // The checker has already decided. The adapter only explains the decision in `result`.
   const handleExplain = async () => {
     if (!result) return;
+    const requestId = ++explainRequestId.current;
     setExplaining(true);
     const explained = await explainAvailability(
       {
@@ -98,11 +103,14 @@ function App() {
       },
       simulateFailure ? failingAdapter : mockAdapter
     );
+    if (requestId !== explainRequestId.current) return; // a newer check or reset happened: stale
     setExplanation(explained);
     setExplaining(false);
   };
 
   const handleReset = () => {
+    explainRequestId.current += 1;
+    setExplaining(false);
     setResult(null);
     setExplanation(null);
     setSubmitted(false);
