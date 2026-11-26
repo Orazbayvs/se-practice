@@ -1,7 +1,7 @@
 # Week 11 — Lab report
 
 **Name:** Оразбай Койбагар
-**Group:**
+**Group:** [CSCI-2208] Software Engineering - Fall 2026
 **Date:** 2026-11-26
 
 Fill in every section. **Do not delete, rename or renumber the headings.** The checker and the
@@ -760,9 +760,11 @@ clean, and both screenshots come from the current page. Still open:
 
 Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run is clean.
 
+none
+
 | Check | Why it stays |
 | --- | --- |
-| | |
+| none | the checker run on a clean clone of the branch gives 27 PASS (locally B2 only fails because of my untracked, git-ignored `app/node_modules/`) |
 
 ---
 
