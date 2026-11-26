@@ -132,6 +132,8 @@ export function validateExplanationInput(raw: unknown): InputCheck {
 
 const NEGATIVE = /\b(unavailable|not available|cannot be booked|can't be booked|not free)\b/i;
 const POSITIVE = /\b(available|free)\b/i;
+// V2: times in any other form than the request's "HH:MM" (4 pm, 4pm, 16.00, 16h00) are never allowed.
+const OTHER_TIME = /\b\d{1,2}\s?(?:am|pm)\b|\b\d{1,2}[.h]\d{2}\b/i;
 
 function countSentences(text: string): number {
   return text
@@ -158,14 +160,16 @@ export function validateExplanationOutput(
   if (countSentences(explanation) > MAX_EXPLANATION_SENTENCES) return null;
 
   // It must agree with the deterministic decision.
+  // V2: an unavailable answer may not also call the room available or free ("… It is free at 4 pm").
   const saysUnavailable = NEGATIVE.test(explanation);
-  const saysAvailable = POSITIVE.test(explanation.replace(NEGATIVE, ''));
+  const saysAvailable = POSITIVE.test(explanation.replace(new RegExp(NEGATIVE.source, 'gi'), ''));
   if (input.isAvailable && (saysUnavailable || !saysAvailable)) return null;
-  if (!input.isAvailable && !saysUnavailable) return null;
+  if (!input.isAvailable && (!saysUnavailable || saysAvailable)) return null;
 
   // It must not name a time the request does not contain.
   const times = explanation.match(/\b\d{1,2}:\d{2}\b/g) ?? [];
   if (times.some((t) => t !== input.start && t !== input.end)) return null;
+  if (OTHER_TIME.test(explanation)) return null;
 
   return explanation;
 }

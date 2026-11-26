@@ -173,3 +173,29 @@ describe('the output check (F2) and the decision (F1)', () => {
     }
   });
 });
+
+describe('review findings', () => {
+  const overlap: ExplanationInput = {
+    roomLabel: 'Room A-101',
+    start: '10:30',
+    end: '11:30',
+    isAvailable: false,
+    reasonCode: 'overlap',
+  };
+
+  test('V2 F2: an unavailable answer that also says the room is free (at 4 pm) is replaced by the fallback', async () => {
+    const hedging: ExplanationAdapter = async () => ({
+      explanation: 'Room A-101 is unavailable for 10:30–11:30. It is free at 4 pm instead.',
+    });
+    const result = await explainAvailability(overlap, hedging, 500);
+    expect(result.ok && result.source).toBe('fallback');
+  });
+
+  test('V2 F2: an invented time written as 16.00 is replaced by the fallback', async () => {
+    const inventor: ExplanationAdapter = async () => ({
+      explanation: 'Room A-101 is unavailable for 10:30–11:30 because of a booking until 16.00.',
+    });
+    const result = await explainAvailability(overlap, inventor, 500);
+    expect(result.ok && result.source).toBe('fallback');
+  });
+});
