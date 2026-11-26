@@ -60,8 +60,55 @@ function getUnavailabilityReasons({
   return reasons;
 }
 
+/**
+ * The six deterministic reason codes (Week 11, README §3.1).
+ * The order of the checks below is the order of the rules in getUnavailabilityReasons:
+ * AC1 (time) -> AC1 (past) -> AC2 (duration) -> AC3 (blocked) -> AC4 (overlap).
+ */
+export const REASON_CODES = [
+  'invalid_time',
+  'past_time',
+  'too_long',
+  'room_blocked',
+  'overlap',
+  'available',
+] as const;
+
+export type ReasonCode = (typeof REASON_CODES)[number];
+
+export function availabilityReason({
+  start,
+  end,
+  now,
+  blocked,
+  bookings,
+}: BookingRequest): ReasonCode {
+  if (
+    ![start, end, now].every(Number.isFinite) ||
+    start < 0 ||
+    end > 1440 ||
+    start >= end
+  ) {
+    return 'invalid_time';
+  }
+  if (start <= now) {
+    return 'past_time';
+  }
+  if (end - start > 120) {
+    return 'too_long';
+  }
+  if (blocked) {
+    return 'room_blocked';
+  }
+  if (bookings.some((booking) => booking.start < end && start < booking.end)) {
+    return 'overlap';
+  }
+  return 'available';
+}
+
+/** The authoritative decision. The rules live in availabilityReason. */
 export function canBook(request: BookingRequest): boolean {
-  return getUnavailabilityReasons(request).length === 0;
+  return availabilityReason(request) === 'available';
 }
 
 export function getBookingReasons(request: BookingRequest): string[] {

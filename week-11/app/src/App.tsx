@@ -1,13 +1,34 @@
 import { useState, useMemo } from 'react';
-import { Building2, Clock, CheckCircle2, XCircle, CalendarX, Users } from 'lucide-react';
+import { Building2, Clock, CheckCircle2, XCircle, CalendarX, Users, Sparkles } from 'lucide-react';
 import { sampleRooms, sampleBookings } from '@/lib/sampleData';
 import { Room, Booking, CheckResult } from '@/lib/types';
-import { canBook, getBookingReasons } from './booking';
+import { availabilityReason, canBook, getBookingReasons, type ReasonCode } from './booking';
+import {
+  explainAvailability,
+  failingAdapter,
+  mockAdapter,
+  type ExplanationResult,
+  type FallbackReason,
+} from './explain';
 import {
   timeToMinutes,
   minutesToTime,
   formatDuration,
 } from '@/lib/availability';
+
+/** The decision as the checker made it, kept with the request it was made for. */
+type Decision = CheckResult & {
+  reasonCode?: ReasonCode;
+  roomLabel: string;
+  start: string;
+  end: string;
+};
+
+const FALLBACK_LABELS: Record<FallbackReason, string> = {
+  timeout: 'the explanation service did not answer in time',
+  adapter_error: 'the explanation service failed',
+  invalid_output: 'the generated text did not pass the safety check',
+};
 
 function App() {
   const [rooms] = useState<Room[]>(sampleRooms);
@@ -17,8 +38,11 @@ function App() {
   const [startTime, setStartTime] = useState<string>('14:00');
   const [endTime, setEndTime] = useState<string>('15:00');
   const [currentTime, setCurrentTime] = useState<string>('09:00');
-  const [result, setResult] = useState<CheckResult | null>(null);
+  const [result, setResult] = useState<Decision | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [explanation, setExplanation] = useState<ExplanationResult | null>(null);
+  const [explaining, setExplaining] = useState(false);
+  const [simulateFailure, setSimulateFailure] = useState(false);
 
   const selectedRoom = useMemo(
     () => rooms.find((r) => r.id === roomId) ?? rooms[0],
@@ -34,8 +58,13 @@ function App() {
     const start = timeToMinutes(startTime);
     const end = timeToMinutes(endTime);
     const cur = timeToMinutes(currentTime);
+    const snapshot = { roomLabel: selectedRoom.name, start: startTime, end: endTime };
     if (start < 0 || end < 0 || cur < 0) {
-      setResult({ available: false, reasons: ['Please enter valid times in HH:MM format.'] });
+      setResult({
+        ...snapshot,
+        available: false,
+        reasons: ['Please enter valid times in HH:MM format.'],
+      });
     } else {
       const request = {
         start,
@@ -45,15 +74,37 @@ function App() {
         bookings: roomBookings,
       };
       setResult({
+        ...snapshot,
         available: canBook(request),
+        reasonCode: availabilityReason(request),
         reasons: getBookingReasons(request),
       });
     }
+    setExplanation(null);
     setSubmitted(true);
+  };
+
+  // The checker has already decided. The adapter only explains the decision in `result`.
+  const handleExplain = async () => {
+    if (!result) return;
+    setExplaining(true);
+    const explained = await explainAvailability(
+      {
+        roomLabel: result.roomLabel,
+        start: result.start,
+        end: result.end,
+        isAvailable: result.available,
+        reasonCode: result.reasonCode,
+      },
+      simulateFailure ? failingAdapter : mockAdapter
+    );
+    setExplanation(explained);
+    setExplaining(false);
   };
 
   const handleReset = () => {
     setResult(null);
+    setExplanation(null);
     setSubmitted(false);
   };
 
@@ -239,6 +290,53 @@ function App() {
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Explain availability (Week 11). The status above is the decision; this box only explains it. */}
+            {submitted && result && (
+              <div className="mt-4 space-y-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <button
+                    onClick={handleExplain}
+                    disabled={explaining}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-60"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    {explaining ? 'Explaining…' : 'Explain availability'}
+                  </button>
+                  <label className="inline-flex items-center gap-2 text-sm text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={simulateFailure}
+                      onChange={(e) => setSimulateFailure(e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300"
+                    />
+                    Simulate API failure
+                  </label>
+                </div>
+
+                {explanation && (
+                  <div
+                    className="rounded-xl border border-dashed border-indigo-300 bg-white p-4"
+                    data-testid="explanation"
+                  >
+                    {explanation.ok ? (
+                      <>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">
+                          {explanation.source === 'model'
+                            ? 'Generated explanation (mock), not a booking decision'
+                            : `Fallback explanation, not generated: ${FALLBACK_LABELS[explanation.fallbackReason]}`}
+                        </p>
+                        <p className="mt-1.5 text-sm text-slate-700">{explanation.explanation}</p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-slate-600">
+                        Could not explain this request: {explanation.message}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </section>
